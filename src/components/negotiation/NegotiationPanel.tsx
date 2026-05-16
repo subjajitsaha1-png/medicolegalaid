@@ -4,8 +4,8 @@ import {
   TrendingUp, TrendingDown, AlertTriangle, CheckCircle,
   Send, Clock, FileText, Scale, MessageSquare, X
 } from 'lucide-react';
-import { useStore, MedicalCase, NegotiationStage } from '../lib/store';
-import { NEGOTIATION_STRATEGY } from '../data/commissionRules';
+import { useStore, MedicalCase, NegotiationStage } from '../../lib/store';
+import { NEGOTIATION_STRATEGY } from '../../data/commissionRules';
 
 interface NegotiationPanelProps {
   caseData: MedicalCase;
@@ -301,7 +301,7 @@ export default function NegotiationPanel({ caseData, onClose, embedded = false }
             )}
 
             <div className="font-semibold text-navy-800 text-sm mb-2">Complete Negotiation Roadmap</div>
-            {NEGOTIATION_STRATEGY.phases.map((phase) => (
+            {NEGOTIATION_STRATEGY.phases.map((phase: any) => (
               <div key={phase.phase} className={`border rounded-xl p-4 ${phase.phase === STAGES_ORDER.indexOf(neg.stage) + 1 ? 'border-teal-300 bg-teal-50' : 'border-gray-100 bg-white'}`}>
                 <div className="flex items-center gap-2 mb-2">
                   <div className={`w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0 ${phase.phase <= stageIdx + 1 ? 'bg-teal-500 text-white' : 'bg-gray-100 text-gray-400'}`}>{phase.phase}</div>
@@ -311,7 +311,7 @@ export default function NegotiationPanel({ caseData, onClose, embedded = false }
                   </div>
                 </div>
                 <ul className="space-y-1">
-                  {phase.actions.map((a, i) => (
+                  {phase.actions.map((a: string, i: number) => (
                     <li key={i} className="text-xs text-gray-600 flex gap-1.5">
                       <CheckCircle className="w-3 h-3 text-teal-400 flex-shrink-0 mt-0.5" /> {a}
                     </li>
