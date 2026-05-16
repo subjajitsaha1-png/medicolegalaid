@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Scale, Shield, Heart, FileText, Users, Zap, ChevronRight,
@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { useStore } from '../lib/store';
 import { UserRole } from '../lib/store';
+import { signInWithEmail, signUpWithEmail, syncSessionToStore, pathForRole } from '../lib/auth';
+import { supabase } from '@/integrations/supabase/client';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -26,10 +28,46 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
   const [showLogin, setShowLogin] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
+  const [fullName, setFullName] = useState('');
+  const [authErr, setAuthErr] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  const handleLogin = () => {
-    useStore.getState().login(loginRole);
-    onLogin(loginRole);
+  // Auto-redirect if already signed in
+  useEffect(() => {
+    let cancelled = false;
+    syncSessionToStore().then((role) => {
+      if (!cancelled && role) onLogin(role);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange(() => {
+      syncSessionToStore().then((role) => {
+        if (!cancelled && role) onLogin(role);
+      });
+    });
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleAuth = async () => {
+    setAuthErr(null);
+    setBusy(true);
+    try {
+      if (mode === 'signup') {
+        if (!fullName.trim()) throw new Error('Please enter your full name');
+        await signUpWithEmail(email.trim(), password, fullName.trim());
+      }
+      await signInWithEmail(email.trim(), password);
+      const role = await syncSessionToStore();
+      setShowLogin(false);
+      if (role) onLogin(role);
+    } catch (e: any) {
+      setAuthErr(e?.message || 'Authentication failed');
+    } finally {
+      setBusy(false);
+    }
   };
 
   const stats = [
@@ -315,15 +353,23 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                   ))}
                 </div>
               </div>
-              <div className="space-y-3 mb-5">
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address" className="input-field" />
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" className="input-field" />
+              <div className="flex gap-2 mb-4 bg-gray-100 rounded-xl p-1">
+                <button onClick={() => setMode('signin')} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${mode === 'signin' ? 'bg-white shadow text-navy-800' : 'text-gray-500'}`}>Sign In</button>
+                <button onClick={() => setMode('signup')} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${mode === 'signup' ? 'bg-white shadow text-navy-800' : 'text-gray-500'}`}>Sign Up</button>
               </div>
-              <button onClick={handleLogin} className="btn-primary w-full text-base">
-                Sign In as {roles.find((r) => r.k === loginRole)?.label}
+              <div className="space-y-3 mb-4">
+                {mode === 'signup' && (
+                  <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full name" className="input-field" />
+                )}
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address" className="input-field" />
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password (min 6 chars)" className="input-field" />
+              </div>
+              {authErr && <div className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg p-2 mb-3">{authErr}</div>}
+              <button onClick={handleAuth} disabled={busy} className="btn-primary w-full text-base disabled:opacity-60">
+                {busy ? 'Please wait…' : mode === 'signup' ? 'Create Account' : 'Sign In'}
               </button>
-              <div className="text-center mt-4 text-xs text-gray-400">
-                Demo mode — enter any credentials to explore the platform
+              <div className="text-center mt-3 text-xs text-gray-500">
+                Role auto-assigned. Admin: <strong>satyasundarthakur@gmail.com</strong>
               </div>
               <div className="mt-3 p-3 bg-teal-50 rounded-xl text-xs text-teal-700 border border-teal-100">
                 <strong>BPL Patients:</strong> Select Patient role → your filing fee will be auto-waived and free legal aid assigned based on your BPL card status.
