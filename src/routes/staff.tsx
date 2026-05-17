@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import StaffDashboard from "@/components/StaffDashboard";
-import { syncSessionToStore, signOut } from "@/lib/auth";
+import { syncSessionToStore, signOut, pathForRole } from "@/lib/auth";
 import { LogOut } from "lucide-react";
 
 export const Route = createFileRoute("/staff")({
@@ -14,7 +14,7 @@ function StaffRoute() {
   useEffect(() => {
     syncSessionToStore().then((role) => {
       if (!role) navigate({ to: "/" });
-      else if (role === "patient") navigate({ to: "/patient" });
+      else if (role === "patient" || role === "admin") navigate({ to: pathForRole(role) as any });
       else setReady(true);
     });
   }, [navigate]);
