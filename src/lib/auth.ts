@@ -6,6 +6,7 @@ const ROLE_TO_PATH: Record<UserRole, string> = {
   staff: '/staff',
   expert: '/staff',
   legal: '/staff',
+  admin: '/admin',
 };
 
 export function pathForRole(role: UserRole) {
@@ -18,11 +19,10 @@ export async function fetchUserRole(userId: string): Promise<UserRole> {
     .select('role')
     .eq('user_id', userId);
   if (!data || data.length === 0) return 'patient';
-  const priority: UserRole[] = ['admin' as UserRole, 'staff', 'legal', 'expert', 'patient'];
+  const priority: UserRole[] = ['admin', 'staff', 'legal', 'expert', 'patient'];
   for (const p of priority) {
     if (data.find((r: { role: string }) => r.role === p)) {
-      // admin maps to staff dashboard in our UI
-      return (p === ('admin' as UserRole) ? 'staff' : p) as UserRole;
+      return p;
     }
   }
   return 'patient';
