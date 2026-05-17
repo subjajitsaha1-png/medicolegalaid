@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
-export type UserRole = 'patient' | 'staff' | 'expert' | 'legal';
+export type UserRole = 'patient' | 'staff' | 'expert' | 'legal' | 'admin';
 
 export interface User {
   id: string;
@@ -227,6 +227,7 @@ const DEMO_USERS: Record<UserRole, User> = {
   staff: { id: 'u3', name: 'Adv. Meera Krishnan', email: 'meera@medicolegal.in', role: 'staff' },
   expert: { id: 'u4', name: 'Dr. Rajiv Menon', email: 'rajiv@medicolegal.in', role: 'expert' },
   legal: { id: 'u5', name: 'Adv. Prashant Kumar', email: 'prashant@medicolegal.in', role: 'legal' },
+  admin: { id: 'u0', name: 'Admin', email: 'admin@medicolegal.in', role: 'admin' },
 };
 
 export const useStore = create<AppStore>()(
