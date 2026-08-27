@@ -131,16 +131,31 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
         {/* Animated grid */}
         <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
+        {/* Signature element: watermark scales of justice, gently balancing */}
+        <motion.svg
+          className="absolute right-[-6%] top-1/2 -translate-y-1/2 w-[560px] h-[560px] opacity-[0.08] pointer-events-none hidden lg:block"
+          viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg"
+          initial={{ rotate: -2 }} animate={{ rotate: 2 }} transition={{ duration: 4, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
+        >
+          <line x1="100" y1="20" x2="100" y2="150" stroke="#FFC107" strokeWidth="3" />
+          <line x1="35" y1="55" x2="165" y2="55" stroke="#FFC107" strokeWidth="3" />
+          <circle cx="100" cy="20" r="6" fill="#FFC107" />
+          <path d="M35 55 L20 100 A18 18 0 0 0 50 100 Z" stroke="#FFC107" strokeWidth="2.5" fill="none" />
+          <path d="M165 55 L150 100 A18 18 0 0 0 180 100 Z" stroke="#FFC107" strokeWidth="2.5" fill="none" />
+          <rect x="70" y="150" width="60" height="10" rx="3" fill="#FFC107" />
+          <rect x="92" y="140" width="16" height="14" fill="#FFC107" />
+        </motion.svg>
+
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 text-center">
           <motion.div initial="hidden" animate="show" variants={stagger}>
-            <motion.div variants={fadeUp} className="inline-flex items-center gap-2 bg-teal-500/20 border border-teal-500/30 rounded-full px-4 py-1.5 text-teal-300 text-sm font-medium mb-8">
-              <span className="w-2 h-2 rounded-full bg-teal-400 animate-pulse-slow" />
-              COPRA 2019 · Latest 2024 Amendments Integrated
+            <motion.div variants={fadeUp} className="inline-flex items-center gap-2 bg-gradient-to-r from-gold-500/20 to-burgundy-500/20 border border-gold-400/30 rounded-full px-4 py-1.5 text-gold-300 text-sm font-medium mb-8">
+              <span className="w-2 h-2 rounded-full bg-gold-400 animate-pulse-slow" />
+              COPRA 2019 · Landmark Precedent Library Included
             </motion.div>
 
             <motion.h1 variants={fadeUp} className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white font-bold leading-tight mb-6">
               Medical Negligence?<br />
-              <span className="text-gradient">We Fight For You.</span>
+              <span className="text-gradient-gold">We Fight For You.</span>
             </motion.h1>
 
             <motion.p variants={fadeUp} className="text-white/70 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
@@ -151,8 +166,8 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
               <button onClick={() => setShowLogin(true)} className="btn-teal text-base px-8 py-4 flex items-center justify-center gap-2">
                 Start Your Case Free <ChevronRight className="w-5 h-5" />
               </button>
-              <button className="border-2 border-white/30 text-white hover:bg-white/10 font-semibold px-8 py-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2">
-                <Phone className="w-4 h-4" /> Helpline: 1800-11-4000
+              <button className="border-2 border-gold-400/40 text-gold-200 hover:bg-gold-500/10 font-semibold px-8 py-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2">
+                <Phone className="w-4 h-4" /> Helpline: 1915 (National Consumer Helpline)
               </button>
             </motion.div>
 
@@ -160,7 +175,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
             <motion.div variants={fadeUp} className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
               {stats.map((s) => (
                 <div key={s.label} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 text-center">
-                  <div className="flex justify-center text-teal-400 mb-2">{s.icon}</div>
+                  <div className="flex justify-center text-gold-400 mb-2">{s.icon}</div>
                   <div className="text-white font-display text-2xl font-bold">{s.value}</div>
                   <div className="text-white/60 text-xs mt-1">{s.label}</div>
                 </div>
@@ -176,28 +191,69 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
         </div>
       </section>
 
+      {/* LANDMARK PRECEDENTS — signature strip */}
+      <section className="py-20 bg-navy-950 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 15% 30%, rgba(122,31,46,0.4) 0%, transparent 45%), radial-gradient(circle at 85% 70%, rgba(255,193,7,0.12) 0%, transparent 45%)' }} />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="section-label mb-3 !text-gold-400">Legal Foundation</div>
+            <h2 className="font-display text-4xl text-white font-bold">Landmark Precedents, Built In</h2>
+            <div className="divider-gold my-4" />
+            <p className="text-white/60 max-w-xl mx-auto">Every case is grounded in the actual legal standard Indian courts apply — not guesswork.</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[
+              { case: 'Jacob Mathew v. State of Punjab', year: '2005', tag: 'Bolam Test', color: 'from-navy-600 to-navy-800' },
+              { case: 'V. Kishan Rao v. Nikhil Hospital', year: '2010', tag: 'Res Ipsa Loquitur', color: 'from-burgundy-500 to-burgundy-700' },
+              { case: 'Kusum Sharma v. Batra Hospital', year: '2010', tag: 'Negligence Standard', color: 'from-teal-500 to-teal-700' },
+              { case: 'Samira Kohli v. Dr. Manchanda', year: '2008', tag: 'Informed Consent', color: 'from-gold-500 to-gold-700' },
+            ].map((p) => (
+              <motion.div key={p.case} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                className={`rounded-2xl p-5 bg-gradient-to-br ${p.color} text-white border border-white/10 shadow-card`}>
+                <div className="w-9 h-9 rounded-full seal-badge flex items-center justify-center mb-4 text-gold-300">
+                  <Scale className="w-4 h-4" />
+                </div>
+                <div className="text-xs uppercase tracking-widest text-white/60 mb-1">{p.year}</div>
+                <div className="font-display font-semibold leading-snug mb-2">{p.case}</div>
+                <div className="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/15 inline-block">{p.tag}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* FEATURES */}
       <section id="features" className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <div className="section-label mb-3">Platform Features</div>
             <h2 className="font-display text-4xl text-navy-800 font-bold">Everything You Need For Justice</h2>
+            <div className="divider-gold my-4" />
             <p className="text-gray-500 mt-4 max-w-xl mx-auto">From filing to final award — our platform guides you through every step with AI assistance and expert support.</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((f, i) => (
-              <motion.div key={f.title} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} viewport={{ once: true }}
-                className="bg-white rounded-2xl p-6 shadow-card card-hover border border-gray-100 group">
-                <div className="w-12 h-12 rounded-xl bg-navy-50 text-navy-600 flex items-center justify-center mb-4 group-hover:bg-teal-50 group-hover:text-teal-600 transition-colors">
-                  {f.icon}
-                </div>
-                <h3 className="font-display font-semibold text-navy-800 text-lg mb-2">{f.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{f.desc}</p>
-              </motion.div>
-            ))}
+            {features.map((f, i) => {
+              const palette = [
+                { bg: 'bg-navy-50', text: 'text-navy-600', hoverBg: 'group-hover:bg-navy-600', hoverText: 'group-hover:text-white' },
+                { bg: 'bg-burgundy-50', text: 'text-burgundy-600', hoverBg: 'group-hover:bg-burgundy-600', hoverText: 'group-hover:text-white' },
+                { bg: 'bg-teal-50', text: 'text-teal-600', hoverBg: 'group-hover:bg-teal-500', hoverText: 'group-hover:text-white' },
+                { bg: 'bg-gold-50', text: 'text-gold-700', hoverBg: 'group-hover:bg-gold-500', hoverText: 'group-hover:text-white' },
+              ][i % 4];
+              return (
+                <motion.div key={f.title} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} viewport={{ once: true }}
+                  className="bg-white rounded-2xl p-6 shadow-card card-hover border border-gray-100 group">
+                  <div className={`w-12 h-12 rounded-xl ${palette.bg} ${palette.text} flex items-center justify-center mb-4 ${palette.hoverBg} ${palette.hoverText} transition-colors`}>
+                    {f.icon}
+                  </div>
+                  <h3 className="font-display font-semibold text-navy-800 text-lg mb-2">{f.title}</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">{f.desc}</p>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
+
 
       {/* HOW IT WORKS */}
       <section id="process" className="py-24 bg-white">

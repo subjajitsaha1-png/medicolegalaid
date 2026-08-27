@@ -70,6 +70,20 @@
   --color-gold-800: #FF8F00;
   --color-gold-900: #FF6F00;
 
+  /* Legal accent — courtroom-robe burgundy, used sparingly for gravitas */
+  --color-burgundy-50:  #FBEAEC;
+  --color-burgundy-100: #F0C4CA;
+  --color-burgundy-200: #E29CA7;
+  --color-burgundy-300: #D07182;
+  --color-burgundy-400: #B84F62;
+  --color-burgundy-500: #9C3347;
+  --color-burgundy-600: #7A1F2E;
+  --color-burgundy-700: #5F1523;
+  --color-burgundy-800: #450D19;
+  --color-burgundy-900: #2C0710;
+
+  --shadow-seal: 0 6px 20px rgba(122,31,46,0.25), 0 0 0 1px rgba(255,193,7,0.35);
+
   --shadow-card: 0 4px 24px rgba(3,15,36,0.08), 0 1px 4px rgba(3,15,36,0.04);
   --shadow-card-hover: 0 8px 40px rgba(3,15,36,0.14), 0 2px 8px rgba(3,15,36,0.06);
   --shadow-glow: 0 0 40px rgba(0,190,165,0.25);
@@ -145,12 +159,29 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  .bg-hero { background: linear-gradient(135deg, #030F24 0%, #0F2D60 60%, #1E4080 100%); }
+  .bg-hero { background: linear-gradient(135deg, #030F24 0%, #0F2D60 55%, #2C0710 88%, #450D19 100%); }
   .bg-hero-mesh {
     background-image:
       radial-gradient(ellipse at 20% 50%, rgba(0,190,165,0.15) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 20%, rgba(30,64,128,0.3) 0%, transparent 60%),
-      radial-gradient(ellipse at 50% 80%, rgba(255,193,7,0.08) 0%, transparent 50%);
+      radial-gradient(ellipse at 80% 20%, rgba(255,193,7,0.10) 0%, transparent 55%),
+      radial-gradient(ellipse at 60% 90%, rgba(122,31,46,0.35) 0%, transparent 55%);
+  }
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #FFD54F, #FFC107 45%, #E29CA7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .divider-gold {
+    height: 3px;
+    width: 64px;
+    margin: 0 auto;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, #FFC107, transparent);
+  }
+  .seal-badge {
+    box-shadow: var(--shadow-seal);
+    background: radial-gradient(circle at 35% 30%, #B84F62, #7A1F2E 65%, #450D19 100%);
   }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
   .scrollbar-hide::-webkit-scrollbar { display: none; }
