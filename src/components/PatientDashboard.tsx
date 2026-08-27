@@ -3,10 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useDropzone } from 'react-dropzone';
 import {
   FileText, Upload, Clock, ChevronRight, CheckCircle,
-  AlertCircle, Download, Eye, Trash2, Zap, IndianRupee,
+  AlertCircle, Download, Eye, Trash2, IndianRupee,
   HelpCircle, User, Building, Calendar, MessageSquare,
   Home, FolderOpen, HeartHandshake, Sparkles, Scale,
-  ClipboardList, Search, Microscope, Handshake, Gavel, Landmark
+  ClipboardList, Search, Microscope, Handshake, Landmark
 } from 'lucide-react';
 import { useStore } from '../lib/store';
 import { useAISuggestion } from '../hooks/useAI';

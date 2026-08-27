@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Filter, ChevronRight, Plus, MessageSquare,
-  Clock, AlertTriangle, CheckCircle, Scale, Users, FileText, Zap,
+  Clock, AlertTriangle, CheckCircle, Scale, Users, FileText,
   Sparkles, Handshake
 } from 'lucide-react';
 import { useStore, MedicalCase } from '../lib/store';
