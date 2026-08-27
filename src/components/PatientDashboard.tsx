@@ -13,6 +13,7 @@ import { useAISuggestion } from '../hooks/useAI';
 import { MedicalCase, Document } from '../lib/store';
 import { COMMISSION_RULES, BPL_PROVISIONS } from '../data/commissionRules';
 import AccountMenu from './AccountMenu';
+import { formatLakhs, thousandsToRupees, commissionForAmount } from '../lib/utils';
 
 const ISSUE_TYPES = [
   'Surgical Negligence', 'Misdiagnosis', 'Wrong Medication', 'Anaesthesia Error',
@@ -61,6 +62,7 @@ export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => 
   });
 
   const handleSubmitCase = () => {
+    const estimatedDamageRupees = thousandsToRupees(form.estimatedDamage);
     const newCase: MedicalCase = {
       id: `ML-2025-${String(cases.length + 1).padStart(3, '0')}`,
       patientId: user?.id || 'u_new',
@@ -77,12 +79,12 @@ export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => 
       issueDescription: form.issueDescription,
       incidentDate: form.incidentDate,
       filedDate: new Date().toISOString().split('T')[0],
-      estimatedDamage: parseInt(form.estimatedDamage) * 100,
+      estimatedDamage: estimatedDamageRupees,
       status: 'submitted',
-      commission: parseInt(form.estimatedDamage) * 100 > 20000000 ? 'national' : parseInt(form.estimatedDamage) * 100 > 5000000 ? 'state' : 'district',
+      commission: commissionForAmount(estimatedDamageRupees),
       priority: form.urgency as 'low' | 'medium' | 'high' | 'urgent',
       experts: [], documents: [], notes: [],
-      negotiation: { stage: 'not_started', hospitalOffer: null, ourDemand: parseInt(form.estimatedDamage) * 100, counterOffer: null, lastActivity: null, agreedAmount: null, mediatorName: null, deadline: null, events: [] },
+      negotiation: { stage: 'not_started', hospitalOffer: null, ourDemand: estimatedDamageRupees, counterOffer: null, lastActivity: null, agreedAmount: null, mediatorName: null, deadline: null, events: [] },
       filingFeeWaiver: form.bplCard || (parseInt(form.annualIncome) < 100000),
       hearingDates: [], lastUpdated: new Date().toISOString().split('T')[0],
     };
@@ -183,7 +185,7 @@ export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => 
                       {[
                         ['Commission', activeCase.commission.toUpperCase()],
                         ['Filed', activeCase.filedDate],
-                        ['Est. Damage', `₹${(activeCase.estimatedDamage / 100000).toFixed(1)}L`],
+                        ['Est. Damage', `₹${formatLakhs(activeCase.estimatedDamage)}`],
                         ['Priority', activeCase.priority],
                       ].map(([l, v]) => (
                         <div key={l} className="bg-gray-50 rounded-xl p-3">
@@ -209,8 +211,8 @@ export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => 
                         <div className="text-xs text-gold-300 mb-1">Active Settlement Track</div>
                         <div className="font-semibold flex items-center gap-1.5"><Handshake className="w-4 h-4" /> Negotiation In Progress</div>
                         <div className="text-xs opacity-90 mt-1">
-                          Hospital: ₹{activeCase.negotiation.hospitalOffer ? (activeCase.negotiation.hospitalOffer / 100000).toFixed(1) : '—'}L
-                          {' · '}Our Counter: ₹{activeCase.negotiation.counterOffer ? (activeCase.negotiation.counterOffer / 100000).toFixed(1) : activeCase.negotiation.ourDemand ? (activeCase.negotiation.ourDemand / 100000).toFixed(1) : '—'}L
+                          Hospital: ₹{activeCase.negotiation.hospitalOffer ? formatLakhs(activeCase.negotiation.hospitalOffer) : '—'}
+                          {' · '}Our Counter: ₹{activeCase.negotiation.counterOffer ? formatLakhs(activeCase.negotiation.counterOffer) : activeCase.negotiation.ourDemand ? formatLakhs(activeCase.negotiation.ourDemand) : '—'}
                         </div>
                       </div>
                     )}
@@ -402,7 +404,10 @@ export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => 
                           <input type="number" value={form.estimatedDamage} onChange={(e) => setForm({ ...form, estimatedDamage: e.target.value })} className="input-field" placeholder="e.g. 1500 for ₹15 Lakhs" />
                           {form.estimatedDamage && (
                             <div className="mt-1.5 text-xs text-teal-600 font-medium">
-                              → Files at: {parseInt(form.estimatedDamage) * 100 > 20000000 ? 'National Commission (NCDRC)' : parseInt(form.estimatedDamage) * 100 > 5000000 ? 'State Commission (SCDRC)' : 'District Commission (DCDRC)'}
+                              → Files at: {(() => {
+                                const c = commissionForAmount(thousandsToRupees(form.estimatedDamage));
+                                return c === 'national' ? 'National Commission (NCDRC)' : c === 'state' ? 'State Commission (SCDRC)' : 'District Commission (DCDRC)';
+                              })()}
                             </div>
                           )}
                         </div>
@@ -450,7 +455,7 @@ export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => 
                     {formStep === 4 && (
                       <div className="space-y-4">
                         <div className="bg-gray-50 rounded-xl divide-y divide-gray-100">
-                          {Object.entries({ Name: form.name, Age: form.age, Hospital: form.hospital, City: form.hospitalCity, 'Issue Type': form.issueType, 'Incident Date': form.incidentDate, 'Estimated Claim': form.estimatedDamage ? `₹${parseInt(form.estimatedDamage) / 10}L` : '—', 'BPL Card': form.bplCard ? 'Yes — Fee waived' : 'No' }).map(([k, v]) => v && (
+                          {Object.entries({ Name: form.name, Age: form.age, Hospital: form.hospital, City: form.hospitalCity, 'Issue Type': form.issueType, 'Incident Date': form.incidentDate, 'Estimated Claim': form.estimatedDamage ? `₹${formatLakhs(thousandsToRupees(form.estimatedDamage))}` : '—', 'BPL Card': form.bplCard ? 'Yes — Fee waived' : 'No' }).map(([k, v]) => v && (
                             <div key={k} className="flex justify-between py-2.5 px-4 text-sm">
                               <span className="text-gray-400">{k}</span>
                               <span className="text-navy-700 font-medium text-right max-w-[55%]">{v}</span>

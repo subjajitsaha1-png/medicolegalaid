@@ -9,6 +9,7 @@ import { useStore, MedicalCase } from '../lib/store';
 import NegotiationPanel from '../components/negotiation/NegotiationPanel';
 import { useAISuggestion } from '../hooks/useAI';
 import AccountMenu, { ROLE_META } from './AccountMenu';
+import { formatLakhs } from '../lib/utils';
 
 const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string }> = {
   submitted: { label: 'Submitted', bg: 'bg-blue-100', text: 'text-blue-700' },
@@ -176,7 +177,7 @@ export default function StaffDashboard({ onSignedOut }: { onSignedOut?: () => vo
                       </div>
                       <div className="flex gap-2 items-center flex-shrink-0">
                         <div className="text-right hidden sm:block">
-                          <div className="text-sm font-bold text-navy-700">₹{(c.estimatedDamage / 100000).toFixed(1)}L</div>
+                          <div className="text-sm font-bold text-navy-700">₹{formatLakhs(c.estimatedDamage)}</div>
                           <div className="text-xs text-gray-400">est. claim</div>
                         </div>
                         {c.status === 'negotiation' && canNegotiate && (
@@ -240,8 +241,8 @@ export default function StaffDashboard({ onSignedOut }: { onSignedOut?: () => vo
                         ['Phone', selected.patientPhone],
                         ['Filed', selected.filedDate],
                         ['Commission', selected.commission.toUpperCase()],
-                        ['Claim', `₹${(selected.estimatedDamage / 100000).toFixed(1)}L`],
-                        ['Income', `₹${(selected.annualIncome / 100000).toFixed(1)}L/yr`],
+                        ['Claim', `₹${formatLakhs(selected.estimatedDamage)}`],
+                        ['Income', `₹${formatLakhs(selected.annualIncome)}/yr`],
                         ['BPL', selected.bplCard ? 'Yes' : 'No'],
                       ].map(([k, v]) => (
                         <div key={k} className="bg-gray-50 rounded-xl p-2.5">

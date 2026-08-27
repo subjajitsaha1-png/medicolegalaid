@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useStore, MedicalCase, NegotiationStage } from '../../lib/store';
 import { NEGOTIATION_STRATEGY } from '../../data/commissionRules';
+import { formatLakhs } from '../../lib/utils';
 
 interface NegotiationPanelProps {
   caseData: MedicalCase;
@@ -184,13 +185,13 @@ export default function NegotiationPanel({ caseData, onClose, embedded = false }
               <div className="bg-red-50 border border-red-100 rounded-xl p-4 text-center">
                 <div className="text-xs font-semibold text-red-500 mb-1 flex items-center justify-center gap-1"><TrendingDown className="w-3 h-3" /> Hospital Offer</div>
                 <div className="text-2xl font-display font-bold text-red-700">
-                  {neg.hospitalOffer ? `₹${(neg.hospitalOffer / 100000).toFixed(1)}L` : '—'}
+                  {neg.hospitalOffer ? `₹${formatLakhs(neg.hospitalOffer)}` : '—'}
                 </div>
               </div>
               <div className="bg-green-50 border border-green-100 rounded-xl p-4 text-center">
                 <div className="text-xs font-semibold text-green-600 mb-1 flex items-center justify-center gap-1"><TrendingUp className="w-3 h-3" /> Our Demand</div>
                 <div className="text-2xl font-display font-bold text-green-700">
-                  {neg.ourDemand ? `₹${(neg.ourDemand / 100000).toFixed(1)}L` : '—'}
+                  {neg.ourDemand ? `₹${formatLakhs(neg.ourDemand)}` : '—'}
                 </div>
               </div>
             </div>
@@ -199,7 +200,7 @@ export default function NegotiationPanel({ caseData, onClose, embedded = false }
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5">
                 <div className="text-xs font-semibold text-amber-700 mb-1">Settlement Gap</div>
                 <div className="flex justify-between items-center">
-                  <div className="text-lg font-bold text-amber-800">₹{(gap / 100000).toFixed(1)}L apart</div>
+                  <div className="text-lg font-bold text-amber-800">₹{formatLakhs(gap)} apart</div>
                   <div className="text-sm font-medium text-amber-600">{gapPct}% difference</div>
                 </div>
                 <div className="mt-2 bg-amber-100 rounded-lg h-2 overflow-hidden">
@@ -212,7 +213,7 @@ export default function NegotiationPanel({ caseData, onClose, embedded = false }
             {neg.counterOffer && (
               <div className="bg-blue-50 border border-blue-100 rounded-xl p-3.5">
                 <div className="text-xs font-semibold text-blue-500 mb-1">Our Counter Offer</div>
-                <div className="text-xl font-display font-bold text-blue-800">₹{(neg.counterOffer / 100000).toFixed(1)}L</div>
+                <div className="text-xl font-display font-bold text-blue-800">₹{formatLakhs(neg.counterOffer)}</div>
               </div>
             )}
 
@@ -267,7 +268,7 @@ export default function NegotiationPanel({ caseData, onClose, embedded = false }
                     </div>
                     {event.amount && (
                       <div className={`text-base font-display font-bold mt-0.5 ${event.actor === 'hospital' ? 'text-red-600' : 'text-teal-600'}`}>
-                        ₹{(event.amount / 100000).toFixed(1)}L
+                        ₹{formatLakhs(event.amount)}
                       </div>
                     )}
                     <div className="text-sm text-gray-600 mt-0.5 leading-relaxed">{event.message}</div>
@@ -358,7 +359,7 @@ export default function NegotiationPanel({ caseData, onClose, embedded = false }
                   return (
                     <button key={pct} onClick={() => setOfferAmount(String(amt))}
                       className="mr-2 mb-1.5 text-xs bg-white border border-blue-200 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors">
-                      ₹{(amt / 100000).toFixed(1)}L ({Math.round(pct * 100)}%)
+                      ₹{formatLakhs(amt)} ({Math.round(pct * 100)}%)
                     </button>
                   );
                 })}

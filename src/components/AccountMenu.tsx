@@ -4,6 +4,7 @@ import { LogOut, Settings, User, Phone, Mail, X, Check, Loader2 } from 'lucide-r
 import { useStore, type UserRole } from '../lib/store';
 import { signOut } from '../lib/auth';
 import { supabase } from '@/integrations/supabase/client';
+import { getInitials } from '../lib/utils';
 
 export const ROLE_META: Record<UserRole, { label: string; badgeClass: string; description: string }> = {
   admin: { label: 'Administrator', badgeClass: 'bg-burgundy-100 text-burgundy-700 border-burgundy-200', description: 'Full platform access — manage users, roles, and all cases' },
@@ -63,7 +64,7 @@ export default function AccountMenu({ onSignedOut, avatarClassName }: AccountMen
         onClick={openMenu}
         className={avatarClassName || 'w-9 h-9 rounded-full bg-gradient-to-br from-burgundy-500 to-burgundy-700 flex items-center justify-center font-bold text-sm border border-white/10 text-white'}
       >
-        {user?.name?.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+        {getInitials(user?.name)}
       </button>
 
       <AnimatePresence>
@@ -86,7 +87,7 @@ export default function AccountMenu({ onSignedOut, avatarClassName }: AccountMen
                 </button>
                 <div className="relative">
                   <div className="w-14 h-14 rounded-full seal-badge flex items-center justify-center font-display font-bold text-lg text-gold-300 mb-3">
-                    {user?.name?.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                    {getInitials(user?.name)}
                   </div>
                   <div className="font-display font-bold text-xl">{user?.name}</div>
                   <div className="text-white/60 text-sm">{user?.email}</div>
