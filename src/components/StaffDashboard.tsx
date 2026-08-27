@@ -106,7 +106,7 @@ export default function StaffDashboard({ onSignedOut }: { onSignedOut?: () => vo
                 <div className="text-[11px] text-gold-400 font-semibold tracking-widest uppercase">{panelTitle}</div>
                 <div className="font-display font-bold text-xl mt-0.5 flex items-center gap-2 flex-wrap">
                   Case Management
-                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${roleMeta.badgeClass}`}>{roleMeta.label}</span>
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border glow-badge ${roleMeta.badgeClass}`}>{roleMeta.label}</span>
                 </div>
               </div>
             </div>

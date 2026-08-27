@@ -91,7 +91,7 @@ export default function AccountMenu({ onSignedOut, avatarClassName }: AccountMen
                   </div>
                   <div className="font-display font-bold text-xl">{user?.name}</div>
                   <div className="text-white/60 text-sm">{user?.email}</div>
-                  <span className={`inline-block mt-3 text-xs font-semibold px-2.5 py-1 rounded-full border ${roleMeta.badgeClass}`}>
+                  <span className={`inline-block mt-3 text-xs font-semibold px-2.5 py-1 rounded-full border glow-badge ${roleMeta.badgeClass}`}>
                     {roleMeta.label}
                   </span>
                   <p className="text-white/50 text-xs mt-2 leading-relaxed">{roleMeta.description}</p>

@@ -119,7 +119,7 @@ function AdminRoute() {
                     <div className="font-medium text-navy-800 truncate">{p.full_name || p.email}</div>
                     <div className="text-xs text-gray-400 truncate">{p.email}</div>
                   </div>
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border w-fit ${meta.badgeClass}`}>{meta.label}</span>
+                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border w-fit glow-badge ${meta.badgeClass}`}>{meta.label}</span>
                   <select
                     disabled={busy === p.id}
                     value={cur}
