@@ -103,7 +103,7 @@ export default function StaffDashboard({ onSignedOut }: { onSignedOut?: () => vo
               </div>
               <div>
                 <div className="text-[11px] text-gold-400 font-semibold tracking-widest uppercase">{panelTitle}</div>
-                <div className="font-display font-bold text-xl mt-0.5 flex items-center gap-2">
+                <div className="font-display font-bold text-xl mt-0.5 flex items-center gap-2 flex-wrap">
                   Case Management
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${roleMeta.badgeClass}`}>{roleMeta.label}</span>
                 </div>
@@ -119,7 +119,7 @@ export default function StaffDashboard({ onSignedOut }: { onSignedOut?: () => vo
           </div>
 
           {/* Stats */}
-          <div className="mt-4 grid grid-cols-4 gap-2 sm:gap-4">
+          <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
             {stats.map((s) => (
               <div key={s.label} className="bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-center backdrop-blur-sm">
                 <div className="flex justify-center mb-1 text-gold-400">{s.icon}</div>
@@ -206,7 +206,7 @@ export default function StaffDashboard({ onSignedOut }: { onSignedOut?: () => vo
 
           {/* Detail Panel */}
           {selected && (
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="bg-white rounded-2xl shadow-card border border-gray-100 h-fit sticky top-32">
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="bg-white rounded-2xl shadow-card border border-gray-100 h-fit lg:sticky lg:top-32">
               <div className="p-5 border-b border-gray-100">
                 <div className="flex items-start justify-between mb-1">
                   <div className="font-display font-bold text-navy-800 text-lg">{selected.patientName}</div>
