@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Filter, ChevronRight, Plus, MessageSquare,
-  Clock, AlertTriangle, CheckCircle, Scale, Users, FileText, Zap
+  Clock, AlertTriangle, CheckCircle, Scale, Users, FileText, Zap,
+  Sparkles, Handshake
 } from 'lucide-react';
 import { useStore, MedicalCase } from '../lib/store';
 import NegotiationPanel from '../components/negotiation/NegotiationPanel';
@@ -83,19 +84,25 @@ export default function StaffDashboard() {
       {negCase && <AnimatePresence><NegotiationPanel key="neg" caseData={negCase} onClose={() => setNegCase(null)} /></AnimatePresence>}
 
       {/* Header */}
-      <div className="bg-navy-950 text-white sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+      <div className="relative bg-hero text-white sticky top-0 z-40 overflow-hidden">
+        <div className="absolute inset-0 bg-hero-mesh pointer-events-none" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
-            <div>
-              <div className="text-xs text-teal-400 font-medium tracking-wide">Admin Panel</div>
-              <div className="font-display font-bold text-xl mt-0.5">Case Management</div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full seal-badge flex items-center justify-center flex-shrink-0 hidden sm:flex">
+                <Scale className="w-4.5 h-4.5 text-gold-300" />
+              </div>
+              <div>
+                <div className="text-[11px] text-gold-400 font-semibold tracking-widest uppercase">Admin Panel</div>
+                <div className="font-display font-bold text-xl mt-0.5">Case Management</div>
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <div className="hidden sm:block text-right">
                 <div className="text-xs text-white/50">Logged in</div>
                 <div className="text-sm font-medium">{user?.name}</div>
               </div>
-              <div className="w-9 h-9 rounded-full bg-teal-600 flex items-center justify-center font-bold text-sm">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-burgundy-500 to-burgundy-700 flex items-center justify-center font-bold text-sm border border-white/10">
                 {user?.name?.split(' ').map((n) => n[0]).join('').slice(0, 2)}
               </div>
             </div>
@@ -104,8 +111,8 @@ export default function StaffDashboard() {
           {/* Stats */}
           <div className="mt-4 grid grid-cols-4 gap-2 sm:gap-4">
             {stats.map((s) => (
-              <div key={s.label} className="bg-white/10 rounded-xl px-3 py-2 text-center">
-                <div className="flex justify-center mb-1 text-white/70">{s.icon}</div>
+              <div key={s.label} className="bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-center backdrop-blur-sm">
+                <div className="flex justify-center mb-1 text-gold-400">{s.icon}</div>
                 <div className="text-xl font-bold text-white">{s.value}</div>
                 <div className="text-xs text-white/60">{s.label}</div>
               </div>
@@ -164,13 +171,13 @@ export default function StaffDashboard() {
                         </div>
                         {c.status === 'negotiation' && (
                           <button onClick={(e) => { e.stopPropagation(); setNegCase(c); }}
-                            className="text-xs font-semibold bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg hover:bg-amber-200 transition-colors">
-                            🤝 Negotiate
+                            className="text-xs font-semibold bg-burgundy-100 text-burgundy-700 px-3 py-1.5 rounded-lg hover:bg-burgundy-200 transition-colors flex items-center gap-1">
+                            <Handshake className="w-3 h-3" /> Negotiate
                           </button>
                         )}
                         <button onClick={(e) => { e.stopPropagation(); handleAI(c); }}
-                          className="text-xs font-semibold bg-navy-100 text-navy-700 px-3 py-1.5 rounded-lg hover:bg-navy-200 transition-colors flex items-center gap-1">
-                          <Zap className="w-3 h-3" /> AI
+                          className="text-xs font-semibold bg-gold-100 text-gold-800 px-3 py-1.5 rounded-lg hover:bg-gold-200 transition-colors flex items-center gap-1">
+                          <Sparkles className="w-3 h-3" /> AI
                         </button>
                       </div>
                     </div>
@@ -207,7 +214,7 @@ export default function StaffDashboard() {
               <div className="flex border-b border-gray-100">
                 {[['info', 'Details'], ['notes', 'Notes'], ['ai', 'AI Advice']].map(([k, l]) => (
                   <button key={k} onClick={() => setActiveDetailTab(k as typeof activeDetailTab)}
-                    className={`flex-1 py-2.5 text-xs font-semibold border-b-2 transition-colors ${activeDetailTab === k ? 'border-navy-700 text-navy-700' : 'border-transparent text-gray-400'}`}>
+                    className={`flex-1 py-2.5 text-xs font-semibold border-b-2 transition-colors ${activeDetailTab === k ? 'border-gold-500 text-burgundy-700' : 'border-transparent text-gray-400'}`}>
                     {l}
                   </button>
                 ))}
@@ -252,8 +259,8 @@ export default function StaffDashboard() {
                     </div>
 
                     {selected.status === 'negotiation' && (
-                      <button onClick={() => setNegCase(selected)} className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors">
-                        🤝 Open Negotiation Panel
+                      <button onClick={() => setNegCase(selected)} className="w-full py-3 rounded-xl bg-gradient-to-r from-burgundy-600 to-burgundy-800 hover:from-burgundy-700 hover:to-burgundy-900 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors border border-gold-400/20">
+                        <Handshake className="w-4 h-4" /> Open Negotiation Panel
                       </button>
                     )}
                   </div>
@@ -262,13 +269,13 @@ export default function StaffDashboard() {
                 {activeDetailTab === 'notes' && (
                   <div className="space-y-3">
                     {(cases.find((c) => c.id === selected.id)?.notes || []).map((note) => (
-                      <div key={note.id} className={`rounded-xl p-3 border-l-3 ${note.isInternal ? 'bg-amber-50 border-l-amber-400' : 'bg-navy-50 border-l-navy-400'}`} style={{ borderLeftWidth: 3 }}>
+                      <div key={note.id} className={`rounded-xl p-3 border-l-3 ${note.isInternal ? 'bg-gold-50 border-l-gold-400' : 'bg-navy-50 border-l-navy-400'}`} style={{ borderLeftWidth: 3 }}>
                         <div className="flex justify-between items-start mb-1">
                           <div className="text-xs font-semibold text-gray-600">{note.author}</div>
                           <div className="text-xs text-gray-400">{note.createdAt}</div>
                         </div>
                         <div className="text-sm text-gray-700 leading-relaxed">{note.content}</div>
-                        {note.isInternal && <div className="text-[10px] text-amber-600 font-semibold mt-1">INTERNAL NOTE</div>}
+                        {note.isInternal && <div className="text-[10px] text-gold-700 font-semibold mt-1">INTERNAL NOTE</div>}
                       </div>
                     ))}
                     <div className="flex gap-2 mt-2">
@@ -284,14 +291,14 @@ export default function StaffDashboard() {
                   <div>
                     {aiLoading ? (
                       <div className="py-8 text-center">
-                        <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                        <div className="w-8 h-8 border-2 border-gold-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
                         <div className="text-gray-400 text-sm">Generating AI strategy...</div>
                       </div>
                     ) : selected.aiSuggestion ? (
                       <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{selected.aiSuggestion}</div>
                     ) : (
                       <div className="text-center py-6">
-                        <Zap className="w-8 h-8 text-gray-200 mx-auto mb-3" />
+                        <Sparkles className="w-8 h-8 text-gray-200 mx-auto mb-3" />
                         <button onClick={() => handleAI(selected)} className="btn-primary text-sm">Generate AI Advice</button>
                       </div>
                     )}

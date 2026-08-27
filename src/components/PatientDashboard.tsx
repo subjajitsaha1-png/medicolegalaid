@@ -4,7 +4,9 @@ import { useDropzone } from 'react-dropzone';
 import {
   FileText, Upload, Clock, ChevronRight, CheckCircle,
   AlertCircle, Download, Eye, Trash2, Zap, IndianRupee,
-  HelpCircle, User, Building, Calendar, MessageSquare
+  HelpCircle, User, Building, Calendar, MessageSquare,
+  Home, FolderOpen, HeartHandshake, Sparkles, Scale,
+  ClipboardList, Search, Microscope, Handshake, Gavel, Landmark
 } from 'lucide-react';
 import { useStore } from '../lib/store';
 import { useAISuggestion } from '../hooks/useAI';
@@ -18,13 +20,13 @@ const ISSUE_TYPES = [
 ];
 
 const TIMELINE_STEPS = [
-  { key: 'submitted', label: 'Grievance Filed', icon: '📋' },
-  { key: 'under_review', label: 'Under Review', icon: '🔍' },
-  { key: 'expert_assigned', label: 'Expert Assigned', icon: '🔬' },
-  { key: 'negotiation', label: 'Settlement Negotiation', icon: '🤝' },
-  { key: 'commission_filed', label: 'Commission Filed', icon: '📝' },
-  { key: 'hearing', label: 'Hearing Scheduled', icon: '🏛️' },
-  { key: 'resolved', label: 'Resolved', icon: '✅' },
+  { key: 'submitted', label: 'Grievance Filed', icon: ClipboardList },
+  { key: 'under_review', label: 'Under Review', icon: Search },
+  { key: 'expert_assigned', label: 'Expert Assigned', icon: Microscope },
+  { key: 'negotiation', label: 'Settlement Negotiation', icon: Handshake },
+  { key: 'commission_filed', label: 'Commission Filed', icon: FileText },
+  { key: 'hearing', label: 'Hearing Scheduled', icon: Landmark },
+  { key: 'resolved', label: 'Resolved', icon: CheckCircle },
 ];
 
 const STATUS_ORDER = ['submitted', 'under_review', 'expert_assigned', 'negotiation', 'commission_filed', 'hearing', 'resolved'];
@@ -109,44 +111,53 @@ export default function PatientDashboard() {
   const currentStepIdx = activeCase ? STATUS_ORDER.indexOf(activeCase.status) : -1;
 
   const tabs = [
-    { k: 'home', label: 'My Case', icon: '🏠' },
-    { k: 'file', label: 'File Grievance', icon: '📋' },
-    { k: 'docs', label: 'Documents', icon: '📂' },
-    { k: 'bpl', label: 'Free Help', icon: '❤️' },
-    { k: 'ai', label: 'AI Advice', icon: '🤖' },
+    { k: 'home', label: 'My Case', icon: Home },
+    { k: 'file', label: 'File Grievance', icon: ClipboardList },
+    { k: 'docs', label: 'Documents', icon: FolderOpen },
+    { k: 'bpl', label: 'Free Help', icon: HeartHandshake },
+    { k: 'ai', label: 'AI Advice', icon: Sparkles },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 font-body">
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,rgba(15,45,96,0.05),transparent_60%)] bg-gray-50 font-body">
       {/* Header */}
-      <div className="bg-navy-900 text-white sticky top-0 z-40">
-        <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
-          <div>
-            <div className="text-xs text-teal-400 font-medium tracking-wide">Patient Portal</div>
-            <div className="font-display font-semibold text-base">Welcome, {user?.name?.split(' ')[0]}</div>
+      <div className="relative bg-hero text-white sticky top-0 z-40 overflow-hidden">
+        <div className="absolute inset-0 bg-hero-mesh pointer-events-none" />
+        <div className="relative max-w-3xl mx-auto px-4 py-3.5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full seal-badge flex items-center justify-center flex-shrink-0">
+              <Scale className="w-4.5 h-4.5 text-gold-300" />
+            </div>
+            <div>
+              <div className="text-[11px] text-gold-400 font-semibold tracking-widest uppercase">Patient Portal</div>
+              <div className="font-display font-semibold text-base leading-tight">Welcome, {user?.name?.split(' ')[0]}</div>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             {activeCase?.bplCard && (
-              <span className="bg-teal-500/20 border border-teal-500/30 text-teal-300 text-[10px] px-2 py-0.5 rounded-full font-semibold">BPL ✓</span>
+              <span className="bg-gold-500/15 border border-gold-400/30 text-gold-300 text-[10px] px-2 py-0.5 rounded-full font-semibold">BPL ✓</span>
             )}
-            <div className="w-9 h-9 rounded-full bg-teal-600 flex items-center justify-center font-bold text-sm">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-burgundy-500 to-burgundy-700 flex items-center justify-center font-bold text-sm border border-white/10">
               {user?.name?.split(' ').map((n) => n[0]).join('').slice(0, 2)}
             </div>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="max-w-lg mx-auto px-2 flex border-t border-white/10 overflow-x-auto scrollbar-hide">
-          {tabs.map((t) => (
-            <button key={t.k} onClick={() => setActiveTab(t.k as typeof activeTab)}
-              className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === t.k ? 'border-teal-400 text-white' : 'border-transparent text-white/50 hover:text-white/80'}`}>
-              <span>{t.icon}</span> {t.label}
-            </button>
-          ))}
+        <div className="relative max-w-3xl mx-auto px-2 flex border-t border-white/10 overflow-x-auto scrollbar-hide">
+          {tabs.map((t) => {
+            const Icon = t.icon;
+            return (
+              <button key={t.k} onClick={() => setActiveTab(t.k as typeof activeTab)}
+                className={`flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === t.k ? 'border-gold-400 text-white' : 'border-transparent text-white/50 hover:text-white/80'}`}>
+                <Icon className="w-3.5 h-3.5" /> {t.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 py-5">
+      <div className="max-w-3xl mx-auto px-4 py-5">
         <AnimatePresence mode="wait">
           {/* HOME TAB */}
           {activeTab === 'home' && (
@@ -193,9 +204,9 @@ export default function PatientDashboard() {
 
                     {/* Negotiation Banner */}
                     {activeCase.status === 'negotiation' && (
-                      <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl p-4 text-white mb-4">
-                        <div className="text-xs opacity-80 mb-1">Active Settlement Track</div>
-                        <div className="font-semibold">🤝 Negotiation In Progress</div>
+                      <div className="bg-gradient-to-r from-burgundy-600 to-burgundy-800 rounded-xl p-4 text-white mb-4 border border-gold-400/20">
+                        <div className="text-xs text-gold-300 mb-1">Active Settlement Track</div>
+                        <div className="font-semibold flex items-center gap-1.5"><Handshake className="w-4 h-4" /> Negotiation In Progress</div>
                         <div className="text-xs opacity-90 mt-1">
                           Hospital: ₹{activeCase.negotiation.hospitalOffer ? (activeCase.negotiation.hospitalOffer / 100000).toFixed(1) : '—'}L
                           {' · '}Our Counter: ₹{activeCase.negotiation.counterOffer ? (activeCase.negotiation.counterOffer / 100000).toFixed(1) : activeCase.negotiation.ourDemand ? (activeCase.negotiation.ourDemand / 100000).toFixed(1) : '—'}L
@@ -206,7 +217,7 @@ export default function PatientDashboard() {
                     {/* AI Button */}
                     <button onClick={handleAI} className="w-full flex items-center justify-between bg-navy-50 hover:bg-navy-100 transition-colors rounded-xl p-3.5 text-navy-700 group">
                       <div className="flex items-center gap-2">
-                        <Zap className="w-4 h-4 text-teal-600" />
+                        <Sparkles className="w-4 h-4 text-gold-600" />
                         <span className="text-sm font-semibold">Get AI Strategy Advice</span>
                       </div>
                       <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -220,19 +231,20 @@ export default function PatientDashboard() {
                       {TIMELINE_STEPS.map((step, i) => {
                         const done = i < currentStepIdx;
                         const active = i === currentStepIdx;
+                        const StepIcon = step.icon;
                         return (
                           <div key={step.key} className="flex gap-3">
                             <div className="flex flex-col items-center">
-                              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-base flex-shrink-0 border-2 ${done ? 'bg-teal-500 border-teal-500 text-white' : active ? 'bg-navy-700 border-navy-700 text-white' : 'bg-gray-100 border-gray-200 text-gray-400'}`}>
-                                {done ? '✓' : step.icon}
+                              <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${done ? 'bg-teal-500 border-teal-500 text-white' : active ? 'bg-gradient-to-br from-burgundy-600 to-burgundy-800 border-gold-400 text-gold-300' : 'bg-gray-100 border-gray-200 text-gray-400'}`}>
+                                {done ? <CheckCircle className="w-4 h-4" /> : <StepIcon className="w-4 h-4" />}
                               </div>
                               {i < TIMELINE_STEPS.length - 1 && (
                                 <div className={`w-0.5 flex-1 min-h-5 my-1 ${done ? 'bg-teal-400' : 'bg-gray-100'}`} />
                               )}
                             </div>
                             <div className="pb-5 pt-1.5">
-                              <div className={`text-sm font-semibold ${done ? 'text-teal-600' : active ? 'text-navy-700' : 'text-gray-400'}`}>{step.label}</div>
-                              {active && <div className="text-xs text-amber-600 font-medium mt-0.5">In progress · last updated {activeCase.lastUpdated}</div>}
+                              <div className={`text-sm font-semibold ${done ? 'text-teal-600' : active ? 'text-burgundy-700' : 'text-gray-400'}`}>{step.label}</div>
+                              {active && <div className="text-xs text-gold-700 font-medium mt-0.5">In progress · last updated {activeCase.lastUpdated}</div>}
                             </div>
                           </div>
                         );
@@ -495,9 +507,9 @@ export default function PatientDashboard() {
           {/* BPL TAB */}
           {activeTab === 'bpl' && (
             <motion.div key="bpl" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-              <div className="bg-gradient-to-br from-teal-500 to-teal-700 rounded-2xl p-5 text-white">
-                <div className="text-lg font-display font-bold mb-1">Free Legal Help</div>
-                <div className="text-teal-100 text-sm">For BPL, SC/ST, disabled & senior citizens</div>
+              <div className="bg-gradient-to-br from-burgundy-600 to-navy-800 rounded-2xl p-5 text-white border border-gold-400/20">
+                <div className="flex items-center gap-2 text-lg font-display font-bold mb-1"><HeartHandshake className="w-5 h-5 text-gold-300" /> Free Legal Help</div>
+                <div className="text-white/70 text-sm">For BPL, SC/ST, disabled & senior citizens</div>
               </div>
 
               <div className="bg-white rounded-2xl shadow-card border border-gray-100 p-5">
@@ -534,7 +546,9 @@ export default function PatientDashboard() {
             <motion.div key="ai" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
               <div className="bg-white rounded-2xl shadow-card border border-gray-100 p-5">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-navy-700 flex items-center justify-center text-xl">🤖</div>
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-navy-700 to-burgundy-700 flex items-center justify-center flex-shrink-0">
+                    <Sparkles className="w-4.5 h-4.5 text-gold-300" />
+                  </div>
                   <div>
                     <div className="font-display font-bold text-navy-800">AI Case Advisor</div>
                     <div className="text-gray-400 text-xs">Powered by Claude · COPRA 2019 Database</div>
@@ -543,7 +557,7 @@ export default function PatientDashboard() {
 
                 {aiLoading ? (
                   <div className="py-8 text-center">
-                    <div className="w-10 h-10 border-3 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                    <div className="w-10 h-10 border-3 border-gold-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
                     <div className="text-gray-500 text-sm">Analyzing your case with Indian medicolegal database...</div>
                   </div>
                 ) : activeCase?.aiSuggestion ? (
@@ -552,7 +566,7 @@ export default function PatientDashboard() {
                   </div>
                 ) : (
                   <div className="text-center py-6">
-                    <Zap className="w-10 h-10 text-gray-200 mx-auto mb-3" />
+                    <Sparkles className="w-10 h-10 text-gray-200 mx-auto mb-3" />
                     <div className="text-gray-500 text-sm mb-4">Click below to get personalized AI advice for your case</div>
                     <button onClick={handleAI} className="btn-primary">Generate AI Strategy</button>
                   </div>
