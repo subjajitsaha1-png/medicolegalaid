@@ -1,5 +1,14 @@
 // ─── CONSUMER PROTECTION ACT 2019 (COPRA) ─────────────────────────────────
-// Latest amendments including 2023 and 2024 notifications
+// Latest amendments including 2021, 2023 and 2024 notifications
+
+// Bump this date whenever any figure in this file is checked against a
+// current gazette notification / official source. Surface it in the UI
+// (e.g. PatientDashboard, NegotiationPanel) so staff and patients can see
+// at a glance how fresh the legal data is.
+export const LEGAL_DATA_LAST_VERIFIED = '2026-08-27';
+
+export const LEGAL_DISCLAIMER =
+  'This tool provides general information about the Consumer Protection Act, 2019 and typical medical negligence case patterns in India. It is not legal advice and does not create an attorney-client relationship. Compensation ranges, success rates, and timelines are indicative estimates, not guarantees. Please verify current jurisdictional limits and consult a qualified advocate or your nearest District Legal Services Authority (DLSA) before filing.';
 
 export const COMMISSION_RULES = {
   district: {
@@ -111,10 +120,10 @@ export const LATEST_AMENDMENTS = [
     impact: 'Out-of-court settlement is now preferred and incentivized',
   },
   {
-    year: '2024',
-    title: 'Enhanced Pecuniary Limits (2024 Notification)',
-    desc: 'District Commission: ₹50L (up from ₹20L). State Commission: ₹2Cr (up from ₹1Cr). National Commission: above ₹2Cr.',
-    impact: 'More cases can be filed at State level; less congestion at NCDRC',
+    year: '2021',
+    title: 'Revised Pecuniary Limits (S.O. 5397(E), December 2021)',
+    desc: 'Central Government notification revised the original COPRA 2019 limits (District ≤₹1Cr, State ₹1Cr–10Cr, National >₹10Cr) downward to the current: District ≤₹50L, State ₹50L–2Cr, National >₹2Cr.',
+    impact: 'More cases can be filed/heard at District and State level; reduces NCDRC backlog. Always verify against the current gazette notification, as these limits are reviewable by the Central Government.',
   },
   {
     year: '2024',
@@ -135,6 +144,82 @@ export const LATEST_AMENDMENTS = [
     impact: 'Easier to build a case using digital communications',
   },
 ];
+
+// ─── LEGAL PRECEDENTS ───────────────────────────────────────────────────
+// Standards Indian courts/commissions actually apply to prove negligence.
+// Attach a `legalBasis` key (matching `id` below) to a case record so the
+// UI can show *why* a case is strong/weak, not just its category.
+export const LEGAL_PRECEDENTS = [
+  {
+    id: 'bolam-jacob-mathew',
+    case: 'Jacob Mathew v. State of Punjab (2005) 6 SCC 1',
+    principle: 'Bolam Test — A doctor is not negligent if they acted in accordance with a practice accepted by a responsible body of medical professionals, even if another body of opinion disagrees. Criminal negligence requires gross recklessness, not mere error of judgment.',
+    application: 'Sets a HIGH bar for criminal prosecution of doctors, but is often cited (sometimes wrongly) by hospitals to resist civil compensation claims too. Useful to know so you can rebut it — COPRA compensation claims are civil, not criminal, and use a lower threshold (see Kishan Rao below).',
+  },
+  {
+    id: 'kishan-rao',
+    case: 'V. Kishan Rao v. Nikhil Super Speciality Hospital (2010) 5 SCC 513',
+    principle: 'Expert medical opinion is NOT mandatory in every case to prove negligence before a consumer commission. Where negligence is obvious on the facts (res ipsa loquitur — "the thing speaks for itself"), the Commission can decide without an expert.',
+    application: 'Directly useful when a hospital stalls a case by insisting you must produce a medical board opinion. Cite this to argue the Commission can proceed on documentary evidence alone for clear-cut cases (e.g., wrong-site surgery, retained instruments).',
+  },
+  {
+    id: 'kusum-sharma',
+    case: 'Kusum Sharma v. Batra Hospital (2010) 3 SCC 480',
+    principle: 'Laid down a 10-point guideline distinguishing genuine medical negligence from an honest error of clinical judgment; courts should be cautious against making doctors an "easy target" but must also not shield real negligence.',
+    application: 'Cited by both sides. Useful to show the Commission you understand the balanced standard rather than an absolutist one — improves credibility of the complaint.',
+  },
+  {
+    id: 'samira-kohli',
+    case: 'Samira Kohli v. Dr. Prabha Manchanda (2008) 2 SCC 1',
+    principle: 'Informed consent must be specific to the procedure actually performed. Consent for a diagnostic procedure does not extend to consent for an additional/extended surgical procedure performed without fresh consent, except in a genuine emergency.',
+    application: 'The leading case for consent-based claims — i.e., where the *procedure itself* may have been competently performed but was never properly consented to. This is a distinct and often stronger ground than clinical negligence (see Deficiency of Service below).',
+  },
+];
+
+// ─── DEFICIENCY OF SERVICE (Section 2(11), COPRA 2019) ─────────────────
+// COPRA's "deficiency" is broader than common-law negligence — it also
+// covers consent failures and billing/administrative malpractice, which
+// can be easier to prove than clinical negligence itself.
+export const DEFICIENCY_OF_SERVICE_GROUNDS = [
+  {
+    ground: 'Informed Consent Failure',
+    desc: 'Procedure performed without consent, or consent obtained for one procedure while a different/extended one was carried out (see Samira Kohli precedent).',
+    evidenceNeeded: ['Signed consent form (or absence of one)', 'OT register entry', 'Any pre-op discussion record'],
+  },
+  {
+    ground: 'Overcharging / Unauthorized Tests & Procedures',
+    desc: 'Billing for tests, medicines, or procedures not actually administered, or inflating charges beyond the hospital\'s declared tariff — a distinct "deficiency" claim, separate from any clinical negligence.',
+    evidenceNeeded: ['Itemized final bill', 'Hospital\'s published tariff card', 'Pharmacy/lab cross-check of billed items'],
+  },
+  {
+    ground: 'Denial of Records / RTI Non-Compliance',
+    desc: 'Hospital refuses or delays providing medical records requested by the patient — itself an actionable deficiency, and also obstructs building a negligence case.',
+    evidenceNeeded: ['Written record request with acknowledgment', 'RTI application (for government hospitals)', 'Delay timeline'],
+  },
+];
+
+// ─── PRODUCT LIABILITY (Sections 82-87, COPRA 2019, Chapter VI) ────────
+// Relevant when the negligence involves a defective device, implant, or
+// drug rather than (or in addition to) clinician error.
+export const PRODUCT_LIABILITY = {
+  summary: 'COPRA 2019 introduced statutory product liability for the first time in India. A "product liability action" can be brought against a product manufacturer, product service provider, or product seller for harm caused by a defective product or deficient service related to a product.',
+  hospitalLiability: 'A hospital can be held liable as a "product seller" for a defective device/implant it supplied, in addition to (not instead of) any liability for the treating doctor\'s own negligence. Liability can be joint.',
+  manufacturerLiability: 'Applies to defective implants, medical devices, or drugs where the defect (not clinical error) caused the harm — e.g., a faulty stent, contaminated IV fluid, or a drug with an undisclosed side effect.',
+  whatToCollect: ['Device/implant batch and lot number', 'Manufacturer name and CDSCO registration if available', 'Any recall notices for that batch', 'Drug package insert / label at time of use'],
+};
+
+// ─── CCPA ENFORCEMENT PATHWAY (separate from Commission compensation) ──
+// CCPA action addresses systemic unfair practice; it does NOT itself award
+// individual compensation — that still requires filing with a Commission.
+export const CCPA_PATHWAY = {
+  clarification: 'CCPA can act suo motu or on complaint against unfair trade practices (e.g., systemic overcharging, misleading claims) and can penalize the hospital, but it does NOT award compensation to the individual patient. Filing a CCPA complaint is a parallel/additional step, not a substitute for a Commission complaint if you want compensation.',
+  penaltyRange: 'Up to ₹10 Lakhs for a first offence; up to ₹50 Lakhs for a repeat offence. Can also order product/service recall and discontinuation of the unfair practice.',
+  freeFirstStep: {
+    name: 'National Consumer Helpline (NCH)',
+    contact: '1915 (toll-free) or the INGRAM / e-Daakhil portal (edaakhil.nic.in)',
+    note: 'A free, non-adversarial first step — many hospitals resolve at this stage without a formal complaint being filed. Older material may still list 1800-11-4000; 1915 is the current unified number.',
+  },
+};
 
 export const NEGLIGENCE_TYPES = [
   {
