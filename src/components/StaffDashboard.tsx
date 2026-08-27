@@ -8,6 +8,7 @@ import {
 import { useStore, MedicalCase } from '../lib/store';
 import NegotiationPanel from '../components/negotiation/NegotiationPanel';
 import { useAISuggestion } from '../hooks/useAI';
+import AccountMenu, { ROLE_META } from './AccountMenu';
 
 const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string }> = {
   submitted: { label: 'Submitted', bg: 'bg-blue-100', text: 'text-blue-700' },
@@ -20,7 +21,7 @@ const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string }>
   dismissed: { label: 'Dismissed', bg: 'bg-gray-100', text: 'text-gray-500' },
 };
 
-export default function StaffDashboard() {
+export default function StaffDashboard({ onSignedOut }: { onSignedOut?: () => void }) {
   const { user, cases, updateCase, addNote } = useStore();
   const { generateSuggestion, aiLoading } = useAISuggestion();
   const [search, setSearch] = useState('');
@@ -31,6 +32,14 @@ export default function StaffDashboard() {
   const [noteText, setNoteText] = useState('');
   const [newStatus, setNewStatus] = useState('');
   const [activeDetailTab, setActiveDetailTab] = useState<'info' | 'notes' | 'ai'>('info');
+
+  const role = user?.role || 'staff';
+  const roleMeta = ROLE_META[role];
+  // Role-based hierarchy: staff/admin manage case status; legal can also negotiate;
+  // experts are read + commentary only (no status changes, no negotiation).
+  const canManageStatus = role === 'admin' || role === 'staff';
+  const canNegotiate = canManageStatus || role === 'legal';
+  const panelTitle = role === 'legal' ? 'Legal Tracker' : role === 'expert' ? 'Expert Review' : role === 'admin' ? 'Admin Panel' : 'Staff Panel';
 
   const filtered = cases.filter((c) => {
     const q = search.toLowerCase();
@@ -93,8 +102,11 @@ export default function StaffDashboard() {
                 <Scale className="w-4.5 h-4.5 text-gold-300" />
               </div>
               <div>
-                <div className="text-[11px] text-gold-400 font-semibold tracking-widest uppercase">Admin Panel</div>
-                <div className="font-display font-bold text-xl mt-0.5">Case Management</div>
+                <div className="text-[11px] text-gold-400 font-semibold tracking-widest uppercase">{panelTitle}</div>
+                <div className="font-display font-bold text-xl mt-0.5 flex items-center gap-2">
+                  Case Management
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${roleMeta.badgeClass}`}>{roleMeta.label}</span>
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -102,9 +114,7 @@ export default function StaffDashboard() {
                 <div className="text-xs text-white/50">Logged in</div>
                 <div className="text-sm font-medium">{user?.name}</div>
               </div>
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-burgundy-500 to-burgundy-700 flex items-center justify-center font-bold text-sm border border-white/10">
-                {user?.name?.split(' ').map((n) => n[0]).join('').slice(0, 2)}
-              </div>
+              <AccountMenu onSignedOut={onSignedOut || (() => {})} />
             </div>
           </div>
 
@@ -169,7 +179,7 @@ export default function StaffDashboard() {
                           <div className="text-sm font-bold text-navy-700">₹{(c.estimatedDamage / 100000).toFixed(1)}L</div>
                           <div className="text-xs text-gray-400">est. claim</div>
                         </div>
-                        {c.status === 'negotiation' && (
+                        {c.status === 'negotiation' && canNegotiate && (
                           <button onClick={(e) => { e.stopPropagation(); setNegCase(c); }}
                             className="text-xs font-semibold bg-burgundy-100 text-burgundy-700 px-3 py-1.5 rounded-lg hover:bg-burgundy-200 transition-colors flex items-center gap-1">
                             <Handshake className="w-3 h-3" /> Negotiate
@@ -247,18 +257,24 @@ export default function StaffDashboard() {
                     </div>
 
                     {/* Update Status */}
-                    <div>
-                      <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Update Status</div>
-                      <div className="flex gap-2">
-                        <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)} className="input-field text-sm flex-1">
-                          <option value="">Current: {STATUS_CONFIG[selected.status]?.label}</option>
-                          {Object.entries(STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-                        </select>
-                        <button onClick={handleUpdateStatus} disabled={!newStatus} className="btn-primary text-sm px-4 py-2.5 disabled:opacity-40">Save</button>
+                    {canManageStatus ? (
+                      <div>
+                        <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Update Status</div>
+                        <div className="flex gap-2">
+                          <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)} className="input-field text-sm flex-1">
+                            <option value="">Current: {STATUS_CONFIG[selected.status]?.label}</option>
+                            {Object.entries(STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+                          </select>
+                          <button onClick={handleUpdateStatus} disabled={!newStatus} className="btn-primary text-sm px-4 py-2.5 disabled:opacity-40">Save</button>
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3 text-xs text-indigo-700">
+                        <strong>{roleMeta.label} access:</strong> {role === 'expert' ? 'You can review case details and add commentary, but status changes are managed by staff.' : 'Status changes are managed by staff/admin.'}
+                      </div>
+                    )}
 
-                    {selected.status === 'negotiation' && (
+                    {selected.status === 'negotiation' && canNegotiate && (
                       <button onClick={() => setNegCase(selected)} className="w-full py-3 rounded-xl bg-gradient-to-r from-burgundy-600 to-burgundy-800 hover:from-burgundy-700 hover:to-burgundy-900 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors border border-gold-400/20">
                         <Handshake className="w-4 h-4" /> Open Negotiation Panel
                       </button>

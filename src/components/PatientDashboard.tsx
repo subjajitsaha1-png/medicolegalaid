@@ -12,6 +12,7 @@ import { useStore } from '../lib/store';
 import { useAISuggestion } from '../hooks/useAI';
 import { MedicalCase, Document } from '../lib/store';
 import { COMMISSION_RULES, BPL_PROVISIONS } from '../data/commissionRules';
+import AccountMenu from './AccountMenu';
 
 const ISSUE_TYPES = [
   'Surgical Negligence', 'Misdiagnosis', 'Wrong Medication', 'Anaesthesia Error',
@@ -31,7 +32,7 @@ const TIMELINE_STEPS = [
 
 const STATUS_ORDER = ['submitted', 'under_review', 'expert_assigned', 'negotiation', 'commission_filed', 'hearing', 'resolved'];
 
-export default function PatientDashboard() {
+export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => void }) {
   const { user, cases, addCase, updateCase } = useStore();
   const { generateSuggestion, aiLoading } = useAISuggestion();
   const [activeTab, setActiveTab] = useState<'home' | 'file' | 'docs' | 'bpl' | 'ai'>('home');
@@ -137,8 +138,8 @@ export default function PatientDashboard() {
             {activeCase?.bplCard && (
               <span className="bg-gold-500/15 border border-gold-400/30 text-gold-300 text-[10px] px-2 py-0.5 rounded-full font-semibold">BPL ✓</span>
             )}
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-burgundy-500 to-burgundy-700 flex items-center justify-center font-bold text-sm border border-white/10">
-              {user?.name?.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-burgundy-500 to-burgundy-700 flex items-center justify-center font-bold text-sm border border-white/10 overflow-hidden">
+              <AccountMenu onSignedOut={onSignedOut || (() => {})} avatarClassName="w-full h-full flex items-center justify-center" />
             </div>
           </div>
         </div>

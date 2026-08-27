@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { syncSessionToStore, signOut, pathForRole } from "@/lib/auth";
-import { LogOut, Shield, Users, FileText, UserCog } from "lucide-react";
+import { syncSessionToStore, pathForRole } from "@/lib/auth";
+import { Shield, Users, FileText, UserCog, Scale } from "lucide-react";
+import AccountMenu, { ROLE_META } from "@/components/AccountMenu";
 
 export const Route = createFileRoute("/admin")({
   component: AdminRoute,
@@ -55,7 +56,7 @@ function AdminRoute() {
   };
 
   if (!ready) {
-    return <div className="min-h-screen flex items-center justify-center text-navy-700">Loading admin…</div>;
+    return <div className="min-h-screen flex items-center justify-center text-navy-700 font-body">Loading admin…</div>;
   }
 
   const roleOf = (uid: string): Role => {
@@ -70,50 +71,60 @@ function AdminRoute() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <button
-        onClick={async () => { await signOut(); navigate({ to: "/" }); }}
-        className="fixed top-3 right-3 z-50 bg-white/90 backdrop-blur border border-gray-200 shadow rounded-full px-3 py-1.5 text-xs font-semibold text-navy-700 flex items-center gap-1.5 hover:bg-white"
-      >
-        <LogOut className="w-3.5 h-3.5" /> Sign out
-      </button>
+    <div className="min-h-screen bg-gray-50 font-body">
+      {/* Header */}
+      <div className="relative bg-hero text-white overflow-hidden">
+        <div className="absolute inset-0 bg-hero-mesh pointer-events-none" />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-full seal-badge flex items-center justify-center flex-shrink-0">
+                <Shield className="w-5 h-5 text-gold-300" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 text-gold-400 text-xs font-semibold uppercase tracking-widest mb-1">
+                  <Scale className="w-3.5 h-3.5" /> Admin Console
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-display font-bold">Platform Administration</h1>
+                <p className="text-sm text-white/60 mt-1">Manage users, roles, and platform activity.</p>
+              </div>
+            </div>
+            <AccountMenu onSignedOut={() => navigate({ to: "/" })} />
+          </div>
+
+          <div className="grid grid-cols-3 gap-3 sm:gap-4 mt-6">
+            {stats.map((s) => (
+              <div key={s.label} className="bg-white/10 border border-white/10 rounded-xl px-4 py-3 backdrop-blur-sm">
+                <div className="text-gold-400 flex items-center gap-2 text-xs">{s.icon}<span className="text-white/70">{s.label}</span></div>
+                <div className="text-2xl sm:text-3xl font-display font-bold mt-1">{s.value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-        <header className="mb-6 sm:mb-8">
-          <div className="flex items-center gap-2 text-amber-600 text-xs font-semibold uppercase tracking-wider mb-2">
-            <Shield className="w-4 h-4" /> Admin Console
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-hidden">
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex items-center gap-2">
+            <UserCog className="w-4 h-4 text-navy-600" />
+            <h2 className="font-display font-semibold text-navy-800">Users &amp; Roles</h2>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Platform Administration</h1>
-          <p className="text-sm text-slate-600 mt-1">Manage users, roles and platform activity.</p>
-        </header>
-
-        <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
-          {stats.map((s) => (
-            <div key={s.label} className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
-              <div className="text-slate-500 flex items-center gap-2 text-xs">{s.icon}<span>{s.label}</span></div>
-              <div className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">{s.value}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-4 sm:px-6 py-4 border-b border-slate-100">
-            <h2 className="font-semibold text-slate-900">Users & Roles</h2>
-          </div>
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-gray-50">
             {profiles.map((p) => {
               const cur = roleOf(p.id);
+              const meta = ROLE_META[cur];
               return (
-                <div key={p.id} className="px-4 sm:px-6 py-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <div key={p.id} className="px-4 sm:px-6 py-3.5 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-slate-900 truncate">{p.full_name || p.email}</div>
-                    <div className="text-xs text-slate-500 truncate">{p.email}</div>
+                    <div className="font-medium text-navy-800 truncate">{p.full_name || p.email}</div>
+                    <div className="text-xs text-gray-400 truncate">{p.email}</div>
                   </div>
+                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border w-fit ${meta.badgeClass}`}>{meta.label}</span>
                   <select
                     disabled={busy === p.id}
                     value={cur}
                     onChange={(e) => updateRole(p.id, e.target.value as Role)}
-                    className="text-sm border border-slate-300 rounded-lg px-2 py-1.5 bg-white"
+                    className="text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-gold-400/40 focus:border-gold-400"
                   >
                     <option value="admin">admin</option>
                     <option value="staff">staff</option>
@@ -125,7 +136,7 @@ function AdminRoute() {
               );
             })}
             {profiles.length === 0 && (
-              <div className="px-6 py-8 text-center text-sm text-slate-500">No users yet.</div>
+              <div className="px-6 py-8 text-center text-sm text-gray-400">No users yet.</div>
             )}
           </div>
         </div>
