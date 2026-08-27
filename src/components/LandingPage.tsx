@@ -3,12 +3,13 @@ import { motion } from 'framer-motion';
 import {
   Scale, Shield, Heart, FileText, Users, Zap, ChevronRight,
   Star, Phone, Mail, MapPin, CheckCircle, AlertTriangle,
-  TrendingUp, Award, Clock, IndianRupee
+  TrendingUp, Award, Clock, IndianRupee, Gavel
 } from 'lucide-react';
 import { useStore } from '../lib/store';
 import { UserRole } from '../lib/store';
 import { signInWithEmail, signUpWithEmail, syncSessionToStore, pathForRole } from '../lib/auth';
 import { supabase } from '@/integrations/supabase/client';
+import { CRIMINAL_LIABILITY_BNS } from '../data/commissionRules';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -218,6 +219,81 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
                 <div className="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/15 inline-block">{p.tag}</div>
               </motion.div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CIVIL VS CRIMINAL LIABILITY — awareness section */}
+      <section className="py-24 bg-gray-50 border-y border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-4">
+            <div className="section-label mb-3">Know Your Options</div>
+            <h2 className="font-display text-4xl text-navy-800 font-bold">Two Legal Tracks: Compensation vs. Prosecution</h2>
+            <div className="divider-gold my-4" />
+            <p className="text-gray-500 max-w-2xl mx-auto">
+              Medical negligence in India can be pursued through two separate, parallel legal systems — this platform handles the first.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6 mt-10">
+            {/* COPRA card */}
+            <div className="bg-white rounded-2xl border-2 border-teal-200 shadow-card p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-11 h-11 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center flex-shrink-0"><Scale className="w-5 h-5" /></div>
+                <div>
+                  <div className="text-xs font-semibold text-teal-600 uppercase tracking-wide">This Platform Handles This</div>
+                  <div className="font-display font-bold text-navy-800 text-lg">Civil — COPRA 2019</div>
+                </div>
+              </div>
+              <p className="text-gray-600 text-sm leading-relaxed mb-4">{CRIMINAL_LIABILITY_BNS.keyDistinction.copra}</p>
+              <ul className="space-y-2">
+                {['Filed with the Consumer Commission (District/State/National)', 'Outcome: monetary compensation to the patient/family', 'Lower standard of proof (preponderance of probability)', 'No police or FIR required'].map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-gray-600"><CheckCircle className="w-4 h-4 text-teal-500 flex-shrink-0 mt-0.5" /> {f}</li>
+                ))}
+              </ul>
+            </div>
+
+            {/* BNS card */}
+            <div className="bg-white rounded-2xl border-2 border-burgundy-200 shadow-card p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-11 h-11 rounded-xl bg-burgundy-50 text-burgundy-700 flex items-center justify-center flex-shrink-0"><Gavel className="w-5 h-5" /></div>
+                <div>
+                  <div className="text-xs font-semibold text-burgundy-600 uppercase tracking-wide">Separate Legal Route</div>
+                  <div className="font-display font-bold text-navy-800 text-lg">Criminal — BNS 2023</div>
+                </div>
+              </div>
+              <p className="text-gray-600 text-sm leading-relaxed mb-4">{CRIMINAL_LIABILITY_BNS.keyDistinction.bns}</p>
+              <ul className="space-y-2">
+                {['Filed as an FIR with police, prosecuted by the State', 'Outcome: imprisonment and/or fine — not paid to the patient', 'Higher standard of proof (beyond reasonable doubt)', 'Requires a criminal lawyer, not the Commission'].map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-gray-600"><AlertTriangle className="w-4 h-4 text-burgundy-500 flex-shrink-0 mt-0.5" /> {f}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* Section 106 detail */}
+          <div className="mt-8 bg-navy-950 rounded-2xl p-6 sm:p-8 text-white relative overflow-hidden">
+            <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 85% 20%, rgba(122,31,46,0.5) 0%, transparent 50%)' }} />
+            <div className="relative">
+              <div className="flex items-center gap-2 text-gold-400 text-xs font-semibold uppercase tracking-widest mb-3">
+                <Gavel className="w-4 h-4" /> {CRIMINAL_LIABILITY_BNS.primaryProvision.section}
+              </div>
+              <p className="text-white/80 text-sm leading-relaxed mb-4">{CRIMINAL_LIABILITY_BNS.primaryProvision.text}</p>
+              <div className="grid sm:grid-cols-2 gap-4 mt-5">
+                <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                  <div className="text-xs text-white/50 uppercase tracking-wide mb-1">General public</div>
+                  <div className="font-display font-bold text-2xl text-white">Up to 5 years</div>
+                  <div className="text-white/60 text-xs mt-1">imprisonment + fine, mandatory</div>
+                </div>
+                <div className="bg-gold-500/10 border border-gold-400/30 rounded-xl p-4">
+                  <div className="text-xs text-gold-300 uppercase tracking-wide mb-1">Registered medical practitioner</div>
+                  <div className="font-display font-bold text-2xl text-gold-300">Up to 2 years</div>
+                  <div className="text-white/60 text-xs mt-1">imprisonment + fine, capped by amendment</div>
+                </div>
+              </div>
+              <p className="text-white/50 text-xs mt-5 leading-relaxed">{CRIMINAL_LIABILITY_BNS.whoCanBeProsecuted}</p>
+              <p className="text-white/40 text-xs mt-3 leading-relaxed border-t border-white/10 pt-3">{CRIMINAL_LIABILITY_BNS.disclaimer}</p>
+            </div>
           </div>
         </div>
       </section>

@@ -40,6 +40,7 @@ export async function getAICaseSuggestion(caseData: {
 - Out-of-court settlement negotiation tactics
 - Indian Supreme Court precedents on medical negligence (Jacob Mathew, Kusum Sharma cases)
 - BPL/poor patient provisions and fee waivers
+- The distinction between civil compensation (COPRA, this platform's focus) and criminal liability under Section 106 of the Bharatiya Nyaya Sanhita 2023 (BNS, effective 1 July 2024, replacing IPC Section 304A) — under which a registered medical practitioner causing death by a negligent act faces up to 2 years' imprisonment plus fine (vs. up to 5 years for the general public), with imprisonment mandatory on conviction. Only mention this criminal route when the case involves a patient death, and always caveat that it requires a separate FIR/criminal lawyer, not this platform's Commission process.
 
 Provide concise, actionable, numbered strategic advice. Use ₹ for amounts. Be specific about Indian law sections. Max 400 words. Format with markdown bold for key points.`,
           messages: [

@@ -208,6 +208,33 @@ export const PRODUCT_LIABILITY = {
   whatToCollect: ['Device/implant batch and lot number', 'Manufacturer name and CDSCO registration if available', 'Any recall notices for that batch', 'Drug package insert / label at time of use'],
 };
 
+// ─── CRIMINAL LIABILITY UNDER BHARATIYA NYAYA SANHITA, 2023 (BNS) ──────
+// A SEPARATE TRACK from COPRA. COPRA/Commission proceedings are civil —
+// they award compensation. BNS is criminal law — it can send the doctor
+// to prison. The two can run in parallel; one does not require the other.
+// BNS replaced the IPC on 1 July 2024. This section is informational only —
+// always advise the patient to consult a criminal lawyer or the local
+// police station for an actual FIR, separate from the Commission filing
+// this app handles.
+export const CRIMINAL_LIABILITY_BNS = {
+  disclaimer: 'This section is for general awareness only. Filing an FIR and pursuing criminal prosecution is a separate legal process from the COPRA Commission route this platform manages — it requires a criminal lawyer and the police/judicial magistrate, not the Consumer Commission.',
+  keyDistinction: {
+    copra: 'Civil / consumer law. Filed with the District/State/National Commission. Outcome: monetary COMPENSATION to the patient. Standard of proof: preponderance of probability (lower bar). Does not require police involvement.',
+    bns: 'Criminal law. Filed as an FIR with police, prosecuted by the State, tried before a criminal court. Outcome: IMPRISONMENT and/or fine — paid to the State, not the patient. Standard of proof: beyond reasonable doubt (higher bar). Compensation, if any, is separate (e.g., via victim compensation schemes), not the primary remedy.',
+    canRunTogether: 'Yes — a patient/family can pursue a COPRA compensation claim against the hospital AND file a criminal complaint against the individual doctor at the same time. They address different wrongs (harm to the patient vs. an offence against the State) and neither is a substitute for the other.',
+  },
+  primaryProvision: {
+    section: 'Section 106(1), Bharatiya Nyaya Sanhita, 2023',
+    replaces: 'Section 304A of the erstwhile Indian Penal Code, 1860 (IPC) — "Causing death by negligence" — which BNS replaced nationwide from 1 July 2024.',
+    text: 'Whoever causes the death of any person by doing any rash or negligent act not amounting to culpable homicide shall be punished with imprisonment of either description for a term which may extend to five years, and shall also be liable to fine.',
+    doctorCarveOut: 'If that act is done by a REGISTERED MEDICAL PRACTITIONER while performing a medical procedure, the punishment is capped at imprisonment up to TWO years (instead of the general five-year ceiling), and a fine. This lower cap for doctors was added by amendment after the Indian Medical Association raised concerns during the bill\'s passage.',
+    mandatoryImprisonment: 'Unlike the old IPC Section 304A — where a fine alone could sometimes be treated as sufficient punishment — BNS Section 106 makes imprisonment itself mandatory on conviction; it cannot be substituted with a fine-only sentence.',
+  },
+  whoCanBeProsecuted: 'Section 106 attaches to the INDIVIDUAL treating doctor/registered medical practitioner whose rash or negligent act caused death — not to the hospital as an institution. A hospital as a legal entity is not itself imprisoned; institutional accountability for a hospital normally runs through COPRA compensation, not BNS. (A hospital administrator could separately face liability only if their own individual conduct meets the negligence standard.)',
+  procedureNote: 'Courts have historically required a threshold check before criminal proceedings move forward against a doctor (see Jacob Mathew v. State of Punjab, requiring prima facie opinion from a competent medical professional/board before an FIR proceeds to prosecution) to prevent doctors being harassed by weak complaints. Some practitioners have raised concern that BNS is less explicit than the earlier framework about requiring this preliminary medical opinion — another reason this route should go through a criminal lawyer familiar with current practice, not be self-filed.',
+  whenThisRouteApplies: 'Only relevant when the alleged negligence caused DEATH. For non-fatal negligence causing injury, the applicable rash/negligent-act provisions differ (e.g., Section 125 BNS for endangering life/personal safety) — again a criminal-law question distinct from the compensation focus of this platform.',
+};
+
 // ─── CCPA ENFORCEMENT PATHWAY (separate from Commission compensation) ──
 // CCPA action addresses systemic unfair practice; it does NOT itself award
 // individual compensation — that still requires filing with a Commission.
