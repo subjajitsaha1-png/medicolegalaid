@@ -122,7 +122,7 @@ export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => 
   ];
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,rgba(15,45,96,0.05),transparent_60%)] bg-gray-50 font-body">
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,rgba(15,45,96,0.06),transparent_60%)] bg-slate-50 font-body">
       {/* Header */}
       <div className="relative bg-hero text-white sticky top-0 z-40 overflow-hidden">
         <div className="absolute inset-0 bg-hero-mesh pointer-events-none" />
@@ -147,17 +147,20 @@ export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => 
         </div>
 
         {/* Tabs */}
-        <div className="relative max-w-3xl mx-auto px-2 flex border-t border-white/10 overflow-x-auto scrollbar-hide">
+        <div className="relative max-w-3xl mx-auto px-2 flex gap-1 border-t border-white/10 overflow-x-auto scrollbar-hide pb-1.5 pt-1.5">
           {tabs.map((t) => {
             const Icon = t.icon;
+            const active = activeTab === t.k;
             return (
               <button key={t.k} onClick={() => setActiveTab(t.k as typeof activeTab)}
-                className={`flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === t.k ? 'border-gold-400 text-white' : 'border-transparent text-white/50 hover:text-white/80'}`}>
+                className={`flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-full transition-all whitespace-nowrap ${active ? 'bg-gold-500/20 text-gold-200 shadow-[0_0_12px_-2px_rgba(255,193,7,0.5)] border border-gold-400/30' : 'text-white/50 hover:text-white/80 hover:bg-white/5 border border-transparent'}`}>
                 <Icon className="w-3.5 h-3.5" /> {t.label}
               </button>
             );
           })}
         </div>
+        {/* Soft seam into the body so the dark header doesn't cut off sharply */}
+        <div className="h-4 bg-gradient-to-b from-navy-950/40 to-transparent pointer-events-none" />
       </div>
 
       <div className="max-w-3xl mx-auto px-4 py-5">
@@ -278,12 +281,39 @@ export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => 
                   )}
                 </>
               ) : (
-                <div className="text-center py-16">
-                  <div className="text-5xl mb-4">📋</div>
-                  <h3 className="font-display font-semibold text-navy-800 text-xl mb-2">No Cases Filed Yet</h3>
-                  <p className="text-gray-500 text-sm mb-6">Start by filing your medical grievance to get expert legal support.</p>
-                  <button onClick={() => setActiveTab('file')} className="btn-teal">File Your First Grievance</button>
-                </div>
+                <>
+                  {/* Summary cards — give first-time users structure instead of a blank screen */}
+                  <div className="grid grid-cols-3 gap-3 mb-4">
+                    {[
+                      { label: 'Active Grievances', value: '0', icon: ClipboardList },
+                      { label: 'Filed Documents', value: '0', icon: FolderOpen },
+                      { label: 'Legal Consultation', value: 'Available', icon: HeartHandshake },
+                    ].map((s) => {
+                      const Icon = s.icon;
+                      return (
+                        <div key={s.label} className="bg-white rounded-xl border border-gray-100 shadow-card p-3.5 text-center">
+                          <div className="flex justify-center text-gold-600 mb-1.5"><Icon className="w-4 h-4" /></div>
+                          <div className="font-display font-bold text-navy-800 text-base sm:text-lg">{s.value}</div>
+                          <div className="text-[10px] sm:text-xs text-gray-400 mt-0.5 leading-tight">{s.label}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-8 text-center">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-navy-700 to-burgundy-700 flex items-center justify-center mx-auto mb-4 border border-gold-400/20">
+                      <Scale className="w-7 h-7 text-gold-300" />
+                    </div>
+                    <h3 className="font-display font-semibold text-navy-800 text-xl mb-2">No Cases Filed Yet</h3>
+                    <p className="text-gray-500 text-sm mb-6 max-w-sm mx-auto leading-relaxed">
+                      Filing a grievance takes under 5 minutes. Receive a confidential case assessment under COPRA 2019 provisions — free of cost for BPL patients.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <button onClick={() => setActiveTab('file')} className="btn-teal">File Your First Grievance</button>
+                      <button onClick={() => setActiveTab('ai')} className="btn-outline">Talk to AI Legal Assistant</button>
+                    </div>
+                  </div>
+                </>
               )}
             </motion.div>
           )}
