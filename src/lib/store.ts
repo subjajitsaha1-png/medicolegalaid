@@ -109,6 +109,7 @@ export interface MedicalCase {
 interface AppStore {
   user: User | null;
   cases: MedicalCase[];
+  casesLoading: boolean;
   currentCaseId: string | null;
   aiLoading: boolean;
 
@@ -116,7 +117,8 @@ interface AppStore {
   logout: () => void;
   setCurrentCase: (id: string | null) => void;
 
-  addCase: (c: MedicalCase) => void;
+  loadCases: () => Promise<void>;
+  addCase: (c: MedicalCase) => Promise<void>;
   updateCase: (id: string, updates: Partial<MedicalCase>) => void;
   addNote: (caseId: string, note: Omit<CaseNote, 'id' | 'createdAt'>) => void;
   updateNegotiation: (caseId: string, updates: Partial<Negotiation>) => void;
@@ -133,52 +135,84 @@ const DEMO_USERS: Record<UserRole, User> = {
   admin: { id: 'u0', name: 'Admin', email: 'admin@medicolegal.in', role: 'admin' },
 };
 
+/** Persists a case to the backend after a local mutation (fire and forget). */
+const persist_case = (id: string) => {
+  const found = useStore.getState().cases.find((c) => c.id === id);
+  if (!found) return;
+  void import('./cases').then(({ saveCase }) => saveCase(found).catch(() => {}));
+};
+
 export const useStore = create<AppStore>()(
   persist(
     (set, get) => ({
       user: null,
-      cases: SAMPLE_CASES,
+      cases: [],
+      casesLoading: false,
       currentCaseId: null,
       aiLoading: false,
 
       login: (role) => set({ user: DEMO_USERS[role] }),
-      logout: () => set({ user: null, currentCaseId: null }),
+      logout: () => set({ user: null, currentCaseId: null, cases: [] }),
       setCurrentCase: (id) => set({ currentCaseId: id }),
 
-      addCase: (c) => set((s) => ({ cases: [...s.cases, c] })),
-      updateCase: (id, updates) =>
+      loadCases: async () => {
+        set({ casesLoading: true });
+        try {
+          const { fetchCases } = await import('./cases');
+          set({ cases: await fetchCases() });
+        } finally {
+          set({ casesLoading: false });
+        }
+      },
+      addCase: async (c) => {
+        const { saveCase } = await import('./cases');
+        await saveCase(c);
+        set((s) => ({ cases: [c, ...s.cases.filter((x) => x.id !== c.id)] }));
+      },
+      updateCase: (id, updates) => {
         set((s) => ({
           cases: s.cases.map((c) =>
             c.id === id ? { ...c, ...updates, lastUpdated: new Date().toISOString().split('T')[0] } : c
           ),
-        })),
-      addNote: (caseId, note) =>
+        }));
+        persist_case(id);
+      },
+      addNote: (caseId, note) => {
         set((s) => ({
           cases: s.cases.map((c) =>
             c.id === caseId
               ? { ...c, notes: [...c.notes, { ...note, id: `n${Date.now()}`, createdAt: new Date().toISOString().split('T')[0] }] }
               : c
           ),
-        })),
-      updateNegotiation: (caseId, updates) =>
+        }));
+        persist_case(caseId);
+      },
+      updateNegotiation: (caseId, updates) => {
         set((s) => ({
           cases: s.cases.map((c) =>
             c.id === caseId ? { ...c, negotiation: { ...c.negotiation, ...updates, lastActivity: new Date().toISOString().split('T')[0] } } : c
           ),
-        })),
-      addNegotiationEvent: (caseId, event) =>
+        }));
+        persist_case(caseId);
+      },
+      addNegotiationEvent: (caseId, event) => {
         set((s) => ({
           cases: s.cases.map((c) =>
             c.id === caseId
               ? { ...c, negotiation: { ...c.negotiation, events: [...c.negotiation.events, { ...event, id: `ne${Date.now()}` }], lastActivity: new Date().toISOString().split('T')[0] } }
               : c
           ),
-        })),
-      setAiSuggestion: (caseId, suggestion) =>
-        set((s) => ({ cases: s.cases.map((c) => (c.id === caseId ? { ...c, aiSuggestion: suggestion } : c)) })),
+        }));
+        persist_case(caseId);
+      },
+      setAiSuggestion: (caseId, suggestion) => {
+        set((s) => ({ cases: s.cases.map((c) => (c.id === caseId ? { ...c, aiSuggestion: suggestion } : c)) }));
+        persist_case(caseId);
+      },
       setAiLoading: (loading) => set({ aiLoading: loading }),
     }),
-    { name: 'medicolegal-store', partialize: (s) => ({ cases: s.cases, user: s.user }) }
+    // Cases are the source of truth in the backend — only the session user is cached.
+    { name: 'medicolegal-store-v2', partialize: (s) => ({ user: s.user }) }
   )
 );
 
