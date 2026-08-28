@@ -220,7 +220,7 @@ export default function StaffDashboard({ onSignedOut }: { onSignedOut?: () => vo
               {filtered.length === 0 && (
                 <div className="text-center py-12 text-gray-400">
                   <Search className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                  No cases match your filters
+                  {casesLoading ? 'Loading cases…' : cases.length === 0 ? 'No cases have been filed yet' : 'No cases match your filters'}
                 </div>
               )}
 
