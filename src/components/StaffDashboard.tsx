@@ -25,7 +25,7 @@ const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string }>
 };
 
 export default function StaffDashboard({ onSignedOut }: { onSignedOut?: () => void }) {
-  const { user, cases, updateCase, addNote } = useStore();
+  const { user, cases, casesLoading, updateCase, addNote, loadCases } = useStore();
   const { generateSuggestion, aiLoading } = useAISuggestion();
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -35,6 +35,10 @@ export default function StaffDashboard({ onSignedOut }: { onSignedOut?: () => vo
   const [noteText, setNoteText] = useState('');
   const [newStatus, setNewStatus] = useState('');
   const [activeDetailTab, setActiveDetailTab] = useState<'info' | 'notes' | 'ai'>('info');
+
+  useEffect(() => {
+    void loadCases();
+  }, [loadCases]);
 
   const role = user?.role || 'staff';
   const roleMeta = ROLE_META[role];

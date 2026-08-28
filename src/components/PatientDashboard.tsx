@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDropzone } from 'react-dropzone';
 import {
@@ -16,6 +16,7 @@ import AccountMenu from './AccountMenu';
 import NegotiationPanel from './negotiation/NegotiationPanel';
 import { formatLakhs, thousandsToRupees, commissionForAmount } from '../lib/utils';
 import { toast } from 'sonner';
+import { newCaseId } from '../lib/cases';
 
 const ISSUE_TYPES = [
   'Surgical Negligence', 'Misdiagnosis', 'Wrong Medication', 'Anaesthesia Error',
@@ -36,13 +37,17 @@ const TIMELINE_STEPS = [
 const STATUS_ORDER = ['submitted', 'under_review', 'expert_assigned', 'negotiation', 'commission_filed', 'hearing', 'resolved'];
 
 export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => void }) {
-  const { user, cases, addCase, updateCase } = useStore();
+  const { user, cases, addCase, updateCase, loadCases } = useStore();
   const { generateSuggestion, aiLoading } = useAISuggestion();
   const [activeTab, setActiveTab] = useState<'home' | 'file' | 'docs' | 'bpl' | 'ai'>('home');
   const [showNegotiation, setShowNegotiation] = useState(false);
   const [formStep, setFormStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+
+  useEffect(() => {
+    void loadCases();
+  }, [loadCases]);
 
   const myCases = cases.filter((c) => c.patientId === user?.id || c.patientName === user?.name);
   const activeCase = myCases[0];
@@ -99,11 +104,18 @@ export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => 
     setFormStep((s) => s + 1);
   };
 
-  const handleSubmitCase = () => {
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmitCase = async () => {
+    if (!user?.id) {
+      toast.error('Please sign in again to file your grievance');
+      return;
+    }
+    if (submitting) return;
     const estimatedDamageRupees = thousandsToRupees(form.estimatedDamage);
     const newCase: MedicalCase = {
-      id: `ML-2025-${String(cases.length + 1).padStart(3, '0')}`,
-      patientId: user?.id || 'u_new',
+      id: newCaseId(),
+      patientId: user.id,
       patientName: form.name,
       patientAge: parseInt(form.age),
       patientPhone: form.phone,
@@ -126,9 +138,17 @@ export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => 
       filingFeeWaiver: form.bplCard || (parseInt(form.annualIncome) < 100000),
       hearingDates: [], lastUpdated: new Date().toISOString().split('T')[0],
     };
-    addCase(newCase);
-    setSubmitted(true);
-    toast.success('Grievance filed successfully', { description: `Case ${newCase.id} has been created and is under review.` });
+    setSubmitting(true);
+    try {
+      await addCase(newCase);
+      setSubmitted(true);
+      toast.success('Grievance filed successfully', { description: `Case ${newCase.id} has been created and is under review.` });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Please try again.';
+      toast.error('Could not file your grievance', { description: message });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleAI = async () => {
