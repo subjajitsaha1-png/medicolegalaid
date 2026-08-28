@@ -4,4 +4,4 @@ Disallow: /patient
 Disallow: /staff
 Disallow: /admin
 
-Sitemap: /sitemap.xml
+Sitemap: https://medicolegalaid.lovable.app/sitemap.xml
