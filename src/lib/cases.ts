@@ -29,7 +29,7 @@ export async function saveCase(c: MedicalCase): Promise<void> {
       {
         id: c.id,
         patient_id: c.patientId,
-        data: c as unknown as Record<string, unknown>,
+        data: c as unknown as never,
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'id' },
