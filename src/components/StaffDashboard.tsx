@@ -25,7 +25,7 @@ const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string }>
 };
 
 export default function StaffDashboard({ onSignedOut }: { onSignedOut?: () => void }) {
-  const { user, cases, updateCase, addNote } = useStore();
+  const { user, cases, casesLoading, updateCase, addNote, loadCases } = useStore();
   const { generateSuggestion, aiLoading } = useAISuggestion();
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -35,6 +35,10 @@ export default function StaffDashboard({ onSignedOut }: { onSignedOut?: () => vo
   const [noteText, setNoteText] = useState('');
   const [newStatus, setNewStatus] = useState('');
   const [activeDetailTab, setActiveDetailTab] = useState<'info' | 'notes' | 'ai'>('info');
+
+  useEffect(() => {
+    void loadCases();
+  }, [loadCases]);
 
   const role = user?.role || 'staff';
   const roleMeta = ROLE_META[role];
@@ -216,7 +220,7 @@ export default function StaffDashboard({ onSignedOut }: { onSignedOut?: () => vo
               {filtered.length === 0 && (
                 <div className="text-center py-12 text-gray-400">
                   <Search className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                  No cases match your filters
+                  {casesLoading ? 'Loading cases…' : cases.length === 0 ? 'No cases have been filed yet' : 'No cases match your filters'}
                 </div>
               )}
 
