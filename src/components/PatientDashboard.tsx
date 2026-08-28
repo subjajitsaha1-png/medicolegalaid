@@ -564,8 +564,8 @@ export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => 
                       {formStep > 1 && (
                         <button onClick={() => setFormStep((s) => s - 1)} className="flex-1 btn-outline text-sm py-2.5">← Back</button>
                       )}
-                      <button onClick={() => formStep < 4 ? handleContinue() : handleSubmitCase()} className="flex-[2] btn-primary text-sm py-2.5">
-                        {formStep === 4 ? 'Submit Grievance ✓' : 'Continue →'}
+                      <button onClick={() => formStep < 4 ? handleContinue() : handleSubmitCase()} disabled={submitting} className="flex-[2] btn-primary text-sm py-2.5 disabled:opacity-60">
+                        {formStep === 4 ? (submitting ? 'Filing…' : 'Submit Grievance ✓') : 'Continue →'}
                       </button>
                     </div>
                   </>
