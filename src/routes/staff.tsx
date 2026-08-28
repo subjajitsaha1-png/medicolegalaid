@@ -13,7 +13,7 @@ function StaffRoute() {
   useEffect(() => {
     syncSessionToStore().then((role) => {
       if (!role) navigate({ to: "/" });
-      else if (role === "patient" || role === "admin") navigate({ to: pathForRole(role) as any });
+      else if (role === "patient") navigate({ to: pathForRole(role) as any });
       else setReady(true);
     });
   }, [navigate]);

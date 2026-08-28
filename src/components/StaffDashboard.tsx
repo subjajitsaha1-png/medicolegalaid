@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
+import { Link } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Filter, ChevronRight, Plus, MessageSquare,
   Clock, AlertTriangle, CheckCircle, Scale, Users, FileText,
-  Sparkles, Handshake
+  Sparkles, Handshake, UserCog
 } from 'lucide-react';
 import { useStore, MedicalCase } from '../lib/store';
 import NegotiationPanel from '../components/negotiation/NegotiationPanel';
@@ -122,6 +123,11 @@ export default function StaffDashboard({ onSignedOut }: { onSignedOut?: () => vo
               </div>
             </div>
             <div className="flex items-center gap-3">
+              {role === 'admin' && (
+                <Link to="/admin" className="hidden sm:flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors">
+                  <UserCog className="w-4 h-4" /> Manage Users
+                </Link>
+              )}
               <div className="hidden sm:block text-right">
                 <div className="text-xs text-white/50">Logged in</div>
                 <div className="text-sm font-medium">{user?.name}</div>

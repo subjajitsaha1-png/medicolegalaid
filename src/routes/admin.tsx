@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { syncSessionToStore, pathForRole } from "@/lib/auth";
@@ -73,10 +73,10 @@ function AdminRoute() {
     return (r?.role as Role) || "patient";
   };
 
-  const stats = [
+  const stats: { icon: React.ReactNode; label: string; value: number; to?: string }[] = [
     { icon: <Users className="w-5 h-5" />, label: "Users", value: profiles.length },
     { icon: <UserCog className="w-5 h-5" />, label: "Roles Assigned", value: roles.length },
-    { icon: <FileText className="w-5 h-5" />, label: "Cases", value: caseCount },
+    { icon: <FileText className="w-5 h-5" />, label: "Cases", value: caseCount, to: "/staff" },
   ];
 
   return (
@@ -98,16 +98,24 @@ function AdminRoute() {
                 <p className="text-sm text-white/60 mt-1">Manage users, roles, and platform activity.</p>
               </div>
             </div>
-            <AccountMenu onSignedOut={() => navigate({ to: "/" })} />
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <Link to="/staff" className="hidden sm:flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors">
+                <FileText className="w-4 h-4" /> Manage Cases
+              </Link>
+              <AccountMenu onSignedOut={() => navigate({ to: "/" })} />
+            </div>
           </div>
 
           <div className="grid grid-cols-3 gap-3 sm:gap-4 mt-6">
-            {stats.map((s) => (
-              <div key={s.label} className="bg-white/10 border border-white/10 rounded-xl px-4 py-3 backdrop-blur-sm">
-                <div className="text-gold-400 flex items-center gap-2 text-xs">{s.icon}<span className="text-white/70">{s.label}</span></div>
-                <div className="text-2xl sm:text-3xl font-display font-bold mt-1">{s.value}</div>
-              </div>
-            ))}
+            {stats.map((s) => {
+              const Tile = (
+                <div className={`bg-white/10 border border-white/10 rounded-xl px-4 py-3 backdrop-blur-sm ${s.to ? 'hover:bg-white/15 transition-colors cursor-pointer' : ''}`}>
+                  <div className="text-gold-400 flex items-center gap-2 text-xs">{s.icon}<span className="text-white/70">{s.label}</span></div>
+                  <div className="text-2xl sm:text-3xl font-display font-bold mt-1">{s.value}</div>
+                </div>
+              );
+              return s.to ? <Link key={s.label} to={s.to}>{Tile}</Link> : <div key={s.label}>{Tile}</div>;
+            })}
           </div>
         </div>
       </div>
