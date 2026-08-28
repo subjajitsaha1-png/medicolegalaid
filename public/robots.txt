@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://medicolegalaid.lovable.app/sitemap.xml
