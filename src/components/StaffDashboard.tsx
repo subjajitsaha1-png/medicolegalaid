@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Filter, ChevronRight, Plus, MessageSquare,
@@ -10,6 +10,7 @@ import NegotiationPanel from '../components/negotiation/NegotiationPanel';
 import { useAISuggestion } from '../hooks/useAI';
 import AccountMenu, { ROLE_META } from './AccountMenu';
 import { formatLakhs } from '../lib/utils';
+import { toast } from 'sonner';
 
 const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string }> = {
   submitted: { label: 'Submitted', bg: 'bg-blue-100', text: 'text-blue-700' },
@@ -50,9 +51,17 @@ export default function StaffDashboard({ onSignedOut }: { onSignedOut?: () => vo
     return matchQ && matchS && matchC;
   });
 
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const pageSafe = Math.min(page, totalPages);
+  const paginated = filtered.slice((pageSafe - 1) * PAGE_SIZE, pageSafe * PAGE_SIZE);
+  // Reset to page 1 whenever the search/filter results change shape
+  useEffect(() => { setPage(1); }, [search, filterStatus, filterCommission]);
+
   const stats = [
     { label: 'Total', value: cases.length, icon: <FileText className="w-4 h-4" />, color: 'text-navy-700' },
-    { label: 'Negotiation', value: cases.filter((c) => c.status === 'negotiation').length, icon: <Scale className="w-4 h-4" />, color: 'text-amber-600' },
+    { label: 'Negotiation', value: cases.filter((c) => c.status === 'negotiation').length, icon: <Scale className="w-4 h-4" />, color: 'text-burgundy-600' },
     { label: 'BPL Cases', value: cases.filter((c) => c.bplCard).length, icon: <Users className="w-4 h-4" />, color: 'text-teal-600' },
     { label: 'Resolved', value: cases.filter((c) => c.status === 'resolved').length, icon: <CheckCircle className="w-4 h-4" />, color: 'text-green-600' },
   ];
@@ -61,12 +70,14 @@ export default function StaffDashboard({ onSignedOut }: { onSignedOut?: () => vo
     if (!selected || !noteText.trim()) return;
     addNote(selected.id, { author: user?.name || 'Staff', role: 'staff', content: noteText.trim(), isInternal: true });
     setNoteText('');
+    toast.success('Note added');
   };
 
   const handleUpdateStatus = () => {
     if (!selected || !newStatus) return;
     updateCase(selected.id, { status: newStatus as MedicalCase['status'] });
     setSelected({ ...selected, status: newStatus as MedicalCase['status'] });
+    toast.success('Case status updated', { description: STATUS_CONFIG[newStatus as MedicalCase['status']]?.label });
     setNewStatus('');
   };
 
@@ -140,7 +151,7 @@ export default function StaffDashboard({ onSignedOut }: { onSignedOut?: () => vo
             <div className="flex flex-col sm:flex-row gap-3 mb-4">
               <div className="relative flex-1">
                 <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search patient, hospital, case ID..." className="input-field pl-10 text-sm" />
+                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search patient, hospital, case ID..." aria-label="Search cases" className="input-field pl-10 text-sm" />
               </div>
               <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="input-field text-sm sm:w-40">
                 <option value="all">All Statuses</option>
@@ -155,7 +166,7 @@ export default function StaffDashboard({ onSignedOut }: { onSignedOut?: () => vo
             </div>
 
             <div className="space-y-3">
-              {filtered.map((c) => {
+              {paginated.map((c) => {
                 const sc = STATUS_CONFIG[c.status] || STATUS_CONFIG.submitted;
                 const isSelected = selected?.id === c.id;
                 return (
@@ -202,6 +213,25 @@ export default function StaffDashboard({ onSignedOut }: { onSignedOut?: () => vo
                   No cases match your filters
                 </div>
               )}
+
+              {filtered.length > PAGE_SIZE && (
+                <div className="flex items-center justify-between pt-2">
+                  <div className="text-xs text-gray-400">
+                    Showing {(pageSafe - 1) * PAGE_SIZE + 1}–{Math.min(pageSafe * PAGE_SIZE, filtered.length)} of {filtered.length}
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={pageSafe === 1}
+                      className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 disabled:opacity-30 hover:bg-gray-50 transition-colors">
+                      <ChevronRight className="w-4 h-4 rotate-180" />
+                    </button>
+                    <span className="text-xs font-semibold text-navy-700 px-2">{pageSafe} / {totalPages}</span>
+                    <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={pageSafe === totalPages}
+                      className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 disabled:opacity-30 hover:bg-gray-50 transition-colors">
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -211,7 +241,7 @@ export default function StaffDashboard({ onSignedOut }: { onSignedOut?: () => vo
               <div className="p-5 border-b border-gray-100">
                 <div className="flex items-start justify-between mb-1">
                   <div className="font-display font-bold text-navy-800 text-lg">{selected.patientName}</div>
-                  <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600 w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100">✕</button>
+                  <button onClick={() => setSelected(null)} aria-label="Close case details" className="text-gray-400 hover:text-gray-600 w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-100">✕</button>
                 </div>
                 <div className="text-gray-500 text-sm">{selected.hospital} · {selected.issueType}</div>
                 <div className="flex gap-2 mt-2 flex-wrap">

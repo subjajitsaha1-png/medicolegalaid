@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /patient
+Disallow: /staff
+Disallow: /admin
+
+Sitemap: /sitemap.xml

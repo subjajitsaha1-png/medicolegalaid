@@ -5,6 +5,7 @@ import { useStore, type UserRole } from '../lib/store';
 import { signOut } from '../lib/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { getInitials } from '../lib/utils';
+import { toast } from 'sonner';
 
 export const ROLE_META: Record<UserRole, { label: string; badgeClass: string; description: string }> = {
   admin: { label: 'Administrator', badgeClass: 'bg-burgundy-100 text-burgundy-700 border-burgundy-200', description: 'Full platform access — manage users, roles, and all cases' },
@@ -44,10 +45,14 @@ export default function AccountMenu({ onSignedOut, avatarClassName }: AccountMen
     if (!user?.id) return;
     setSaving(true);
     try {
-      await supabase.from('profiles').update({ full_name: name.trim(), phone: phone.trim() }).eq('id', user.id);
+      const { error } = await supabase.from('profiles').update({ full_name: name.trim(), phone: phone.trim() }).eq('id', user.id);
+      if (error) throw error;
       useStore.setState({ user: { ...user, name: name.trim() } });
       setSaved(true);
+      toast.success('Profile updated');
       setTimeout(() => setSaved(false), 2000);
+    } catch (err) {
+      toast.error('Could not save profile', { description: err instanceof Error ? err.message : 'Please try again.' });
     } finally {
       setSaving(false);
     }
@@ -62,6 +67,7 @@ export default function AccountMenu({ onSignedOut, avatarClassName }: AccountMen
     <>
       <button
         onClick={openMenu}
+        aria-label="Open account settings"
         className={avatarClassName || 'w-9 h-9 rounded-full bg-gradient-to-br from-burgundy-500 to-burgundy-700 flex items-center justify-center font-bold text-sm border border-white/10 text-white'}
       >
         {getInitials(user?.name)}
@@ -82,7 +88,7 @@ export default function AccountMenu({ onSignedOut, avatarClassName }: AccountMen
             >
               <div className="bg-hero relative text-white p-6 overflow-hidden">
                 <div className="absolute inset-0 bg-hero-mesh pointer-events-none" />
-                <button onClick={() => setOpen(false)} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+                <button onClick={() => setOpen(false)} aria-label="Close account settings" className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
                   <X className="w-4 h-4" />
                 </button>
                 <div className="relative">

@@ -29,3 +29,22 @@ export function commissionForAmount(rupees: number): 'district' | 'state' | 'nat
 export function getInitials(name?: string | null): string {
   return name?.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() || '';
 }
+
+/** Estimates the Commission filing fee for a given rupee claim amount, using the
+ * bracket tables in COMMISSION_RULES. Returns 0 for BPL card holders per COPRA
+ * Section 17A (zero filing fee). This is an estimate for public awareness —
+ * always confirm the exact fee with the Commission at filing time. */
+export function estimateFilingFee(rupees: number, bplCard: boolean): number {
+  if (bplCard) return 0;
+  const lakh = 100000;
+  const crore = 10000000;
+  if (rupees <= 5 * lakh) return 200;
+  if (rupees <= 10 * lakh) return 400;
+  if (rupees <= 20 * lakh) return 500;
+  if (rupees <= 50 * lakh) return 2000;
+  if (rupees <= crore) return 4000;
+  if (rupees <= 2 * crore) return 5000;
+  if (rupees <= 5 * crore) return 7500;
+  if (rupees <= 10 * crore) return 10000;
+  return 15000;
+}

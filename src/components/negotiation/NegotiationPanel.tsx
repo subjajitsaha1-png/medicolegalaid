@@ -149,7 +149,7 @@ export default function NegotiationPanel({ caseData, onClose, embedded = false }
             <div className="text-white/70 text-sm mt-0.5">{caseData.patientName} · {caseData.issueType}</div>
           </div>
           {onClose && (
-            <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors">
+            <button onClick={onClose} aria-label="Close negotiation panel" className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors">
               <X className="w-4 h-4" />
             </button>
           )}

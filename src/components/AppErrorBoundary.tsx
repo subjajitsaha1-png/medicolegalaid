@@ -1,0 +1,50 @@
+import { Component, type ReactNode } from 'react';
+
+interface Props {
+  children: ReactNode;
+}
+interface State {
+  hasError: boolean;
+}
+
+/** Catches render/runtime errors anywhere below it in the tree — the router's
+ * built-in errorComponent only catches errors during route loading, not
+ * errors thrown while a component is rendering or updating. Without this,
+ * a runtime error inside a dashboard produces a blank white screen. */
+export default class AppErrorBoundary extends Component<Props, State> {
+  state: State = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, info: { componentStack: string }) {
+    console.error('Unhandled render error:', error, info.componentStack);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-background px-4">
+          <div className="max-w-md text-center">
+            <h1 className="text-xl font-semibold tracking-tight text-foreground">
+              Something went wrong
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              This part of the app hit an unexpected error. Your data is safe — try reloading the page.
+            </p>
+            <div className="mt-6">
+              <button
+                onClick={() => window.location.reload()}
+                className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                Reload page
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}

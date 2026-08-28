@@ -3,13 +3,14 @@ import { motion } from 'framer-motion';
 import {
   Scale, Shield, Heart, FileText, Users, Zap, ChevronRight,
   Star, Phone, Mail, MapPin, CheckCircle, AlertTriangle,
-  TrendingUp, Award, Clock, IndianRupee, Gavel
+  TrendingUp, Award, Clock, IndianRupee, Gavel, Calculator
 } from 'lucide-react';
 import { useStore } from '../lib/store';
 import { UserRole } from '../lib/store';
 import { signInWithEmail, signUpWithEmail, syncSessionToStore, pathForRole } from '../lib/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { CRIMINAL_LIABILITY_BNS } from '../data/commissionRules';
+import { estimateFilingFee, formatLakhs, commissionForAmount } from '../lib/utils';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -27,6 +28,9 @@ interface LandingPageProps {
 export default function LandingPage({ onLogin }: LandingPageProps) {
   const [loginRole, setLoginRole] = useState<UserRole>('patient');
   const [showLogin, setShowLogin] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [calcLakhs, setCalcLakhs] = useState('15');
+  const [calcBpl, setCalcBpl] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
@@ -189,6 +193,73 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/40 text-xs animate-bounce">
           <span>Scroll to explore</span>
           <div className="w-0.5 h-8 bg-gradient-to-b from-white/40 to-transparent" />
+        </div>
+      </section>
+
+      {/* PUBLIC CALCULATOR — no login required */}
+      <section className="py-20 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <div className="section-label mb-3">No Sign-Up Needed</div>
+            <h2 className="font-display text-4xl text-navy-800 font-bold">Estimate Your Case in 10 Seconds</h2>
+            <div className="divider-gold my-4" />
+            <p className="text-gray-500 max-w-xl mx-auto">See which Commission your case would go to and roughly what filing costs before creating an account.</p>
+          </div>
+
+          <div className="bg-gray-50 rounded-3xl border border-gray-100 p-6 sm:p-8">
+            <div className="grid sm:grid-cols-2 gap-6 items-start">
+              <div>
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Estimated Compensation Claim</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">₹</span>
+                  <input
+                    type="number" min="0" value={calcLakhs} onChange={(e) => setCalcLakhs(e.target.value)}
+                    className="input-field pl-8 text-lg font-semibold"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">Lakhs</span>
+                </div>
+                <input
+                  type="range" min="1" max="500" value={calcLakhs} onChange={(e) => setCalcLakhs(e.target.value)}
+                  className="w-full mt-3 accent-gold-500"
+                />
+
+                <label className="flex items-center gap-2 mt-5 cursor-pointer">
+                  <input type="checkbox" checked={calcBpl} onChange={(e) => setCalcBpl(e.target.checked)} className="w-4 h-4 accent-teal-500" />
+                  <span className="text-sm text-gray-600">I have a BPL / AAY / PMJAY card</span>
+                </label>
+              </div>
+
+              {(() => {
+                const rupees = (parseFloat(calcLakhs) || 0) * 100000;
+                const tier = commissionForAmount(rupees);
+                const fee = estimateFilingFee(rupees, calcBpl);
+                const tierMeta = {
+                  district: { name: 'District Commission (DCDRC)', color: 'from-teal-500 to-teal-700' },
+                  state: { name: 'State Commission (SCDRC)', color: 'from-navy-600 to-navy-800' },
+                  national: { name: 'National Commission (NCDRC)', color: 'from-burgundy-600 to-burgundy-800' },
+                }[tier];
+                return (
+                  <div className={`rounded-2xl p-5 text-white bg-gradient-to-br ${tierMeta.color}`}>
+                    <div className="text-xs text-white/70 uppercase tracking-wide mb-1">You would file at</div>
+                    <div className="font-display font-bold text-xl mb-4">{tierMeta.name}</div>
+                    <div className="flex items-end justify-between border-t border-white/20 pt-4">
+                      <div>
+                        <div className="text-xs text-white/70">Estimated filing fee</div>
+                        <div className="font-display font-bold text-2xl">{fee === 0 ? '₹0' : `₹${fee.toLocaleString('en-IN')}`}</div>
+                      </div>
+                      {calcBpl && <span className="status-badge bg-gold-500/20 text-gold-200 border border-gold-400/30">Fee Waived — BPL</span>}
+                    </div>
+                    <div className="text-xs text-white/60 mt-3">Claim value: ₹{formatLakhs(rupees)}</div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            <button onClick={() => setShowLogin(true)} className="btn-primary w-full mt-6 flex items-center justify-center gap-2">
+              <Calculator className="w-4 h-4" /> File This Case Now
+            </button>
+            <p className="text-xs text-gray-400 text-center mt-3">Estimate only — the Commission determines your actual fee and jurisdiction at filing.</p>
+          </div>
         </div>
       </section>
 
@@ -441,7 +512,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
             {[
               { title: 'Platform', links: ['File Grievance', 'Track Case', 'Expert Review', 'Settlement Help'] },
               { title: 'Legal', links: ['COPRA 2019', 'NCDRC Rules', 'State Commissions', 'RTI Filing'] },
-              { title: 'Support', links: ['Helpline: 1800-11-4000', 'Email: help@medilegal.in', 'E-Daakhil Portal', 'DLSA Directory'] },
+              { title: 'Support', links: ['National Helpline: 1915', 'Email: help@medilegal.in', 'E-Daakhil Portal', 'DLSA Directory'] },
             ].map((col) => (
               <div key={col.title}>
                 <div className="font-semibold text-sm mb-3 text-white/80">{col.title}</div>
@@ -451,11 +522,84 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
               </div>
             ))}
           </div>
-          <div className="border-t border-white/10 pt-6 text-center text-white/40 text-xs">
-            © 2025 MediLegal Assist · Consumer Protection Act 2019 · Not a substitute for professional legal advice
+          <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center text-white/40 text-xs">
+            <span>© {new Date().getFullYear()} MediLegal Assist · Consumer Protection Act 2019 · Not a substitute for professional legal advice</span>
+            <button onClick={() => setShowPrivacy(true)} className="text-white/50 hover:text-gold-400 underline underline-offset-2 transition-colors">
+              Privacy Policy (DPDP Act 2023)
+            </button>
           </div>
         </div>
       </footer>
+
+      {/* PRIVACY POLICY MODAL */}
+      {showPrivacy && (
+        <div className="fixed inset-0 bg-navy-950/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white rounded-3xl w-full max-w-2xl max-h-[85vh] shadow-2xl overflow-hidden flex flex-col">
+            <div className="bg-hero p-6 text-white relative overflow-hidden flex-shrink-0">
+              <div className="absolute inset-0 bg-hero-mesh pointer-events-none" />
+              <div className="relative flex items-center justify-between">
+                <div>
+                  <div className="text-xs text-gold-400 font-semibold uppercase tracking-widest mb-1">Digital Personal Data Protection Act, 2023</div>
+                  <h3 className="font-display font-bold text-xl">Privacy Policy</h3>
+                </div>
+                <button onClick={() => setShowPrivacy(false)} aria-label="Close privacy policy" className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors flex-shrink-0">
+                  <span className="text-lg leading-none">✕</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 overflow-y-auto text-sm text-gray-600 leading-relaxed space-y-4">
+              <p>
+                This platform ("MediLegal Assist") helps patients file and track medical negligence grievances under the Consumer Protection Act, 2019. Because this involves health, financial, and identity information, here is a plain-language account of how your data is handled, consistent with the Digital Personal Data Protection Act, 2023 (DPDP Act).
+              </p>
+
+              <div>
+                <h4 className="font-display font-semibold text-navy-800 mb-1.5">What we collect</h4>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Identity details: name, age, phone, email</li>
+                  <li>Financial information: annual family income, BPL/AAY/PMJAY card status (used only to determine fee waiver eligibility)</li>
+                  <li>Health-related information: description of the medical incident, hospital records, and documents you upload as evidence</li>
+                  <li>Case data: hospital name, location, incident date, and your compensation demand</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-display font-semibold text-navy-800 mb-1.5">Why we collect it</h4>
+                <p>Solely to file, track, and support your grievance before the appropriate Consumer Commission, to assess fee-waiver eligibility, and to generate AI-assisted case strategy suggestions. We do not use your data for advertising or sell it to third parties.</p>
+              </div>
+
+              <div>
+                <h4 className="font-display font-semibold text-navy-800 mb-1.5">Who can see it</h4>
+                <p>Your case is visible to you, to the staff/legal/expert reviewers assigned to support your case, and to administrators for platform operation. Health and financial details are never shared outside this purpose without your consent, except where required by law (e.g., a Commission or court order).</p>
+              </div>
+
+              <div>
+                <h4 className="font-display font-semibold text-navy-800 mb-1.5">Your rights under the DPDP Act, 2023</h4>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Right to access a summary of the personal data we hold about you</li>
+                  <li>Right to correction and updating of inaccurate or incomplete data</li>
+                  <li>Right to erasure of your data, once it is no longer needed for your case or a legal requirement</li>
+                  <li>Right to withdraw consent at any time, and to grievance redressal regarding how your data is handled</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-display font-semibold text-navy-800 mb-1.5">AI-assisted advice</h4>
+                <p>Case details you provide may be sent to a third-party AI service to generate strategy suggestions. This is used to support, not replace, human legal judgment — always verify AI-generated advice with your assigned staff, legal reviewer, or an independent advocate.</p>
+              </div>
+
+              <div>
+                <h4 className="font-display font-semibold text-navy-800 mb-1.5">Data retention & security</h4>
+                <p>Your data is retained for as long as your case is active and for a reasonable period after resolution for legal/audit purposes, then deleted or anonymized on request where legally permissible. Access is restricted by role (patient, staff, legal, expert, admin).</p>
+              </div>
+
+              <p className="text-xs text-gray-400 border-t border-gray-100 pt-4">
+                This is a general-purpose notice and not a substitute for formal legal advice. For questions about your data or to exercise any of the above rights, contact us via the National Consumer Helpline (1915) or the support email listed in the footer.
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      )}
 
       {/* LOGIN MODAL */}
       {showLogin && (

@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { syncSessionToStore, pathForRole } from "@/lib/auth";
 import { Shield, Users, FileText, UserCog, Scale } from "lucide-react";
 import AccountMenu, { ROLE_META } from "@/components/AccountMenu";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
   component: AdminRoute,
@@ -49,10 +50,18 @@ function AdminRoute() {
 
   const updateRole = async (userId: string, newRole: Role) => {
     setBusy(userId);
-    await supabase.from("user_roles").delete().eq("user_id", userId);
-    await supabase.from("user_roles").insert({ user_id: userId, role: newRole });
-    await loadData();
-    setBusy(null);
+    try {
+      const { error: delErr } = await supabase.from("user_roles").delete().eq("user_id", userId);
+      if (delErr) throw delErr;
+      const { error: insErr } = await supabase.from("user_roles").insert({ user_id: userId, role: newRole });
+      if (insErr) throw insErr;
+      await loadData();
+      toast.success(`Role updated to ${ROLE_META[newRole].label}`);
+    } catch (err) {
+      toast.error("Could not update role", { description: err instanceof Error ? err.message : "Please try again." });
+    } finally {
+      setBusy(null);
+    }
   };
 
   if (!ready) {

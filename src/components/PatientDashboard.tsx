@@ -13,7 +13,9 @@ import { useAISuggestion } from '../hooks/useAI';
 import { MedicalCase, Document } from '../lib/store';
 import { COMMISSION_RULES, BPL_PROVISIONS } from '../data/commissionRules';
 import AccountMenu from './AccountMenu';
+import NegotiationPanel from './negotiation/NegotiationPanel';
 import { formatLakhs, thousandsToRupees, commissionForAmount } from '../lib/utils';
+import { toast } from 'sonner';
 
 const ISSUE_TYPES = [
   'Surgical Negligence', 'Misdiagnosis', 'Wrong Medication', 'Anaesthesia Error',
@@ -37,6 +39,7 @@ export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => 
   const { user, cases, addCase, updateCase } = useStore();
   const { generateSuggestion, aiLoading } = useAISuggestion();
   const [activeTab, setActiveTab] = useState<'home' | 'file' | 'docs' | 'bpl' | 'ai'>('home');
+  const [showNegotiation, setShowNegotiation] = useState(false);
   const [formStep, setFormStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
@@ -53,13 +56,48 @@ export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => 
     hasExpertOpinion: false, urgency: 'medium',
   });
 
-  const onDrop = useCallback((accepted: File[]) => {
+  const onDrop = useCallback((accepted: File[], rejected: import('react-dropzone').FileRejection[]) => {
     setUploadedFiles((prev) => [...prev, ...accepted.map((f) => f.name)]);
+    rejected.forEach((r) => {
+      const reason = r.errors[0]?.code === 'file-too-large' ? 'exceeds 10MB' : r.errors[0]?.code === 'file-invalid-type' ? 'unsupported file type' : 'could not be added';
+      toast.error(`${r.file.name} ${reason}`);
+    });
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop, accept: { 'application/pdf': ['.pdf'], 'image/*': ['.png', '.jpg', '.jpeg'] }, multiple: true,
+    maxSize: 10 * 1024 * 1024, // 10MB — matches the "Max 10MB each" text shown to the user
   });
+
+  /** Validates the current step's required fields before allowing "Continue".
+   * Returns a list of missing-field labels (empty = valid). */
+  const validateStep = (step: number): string[] => {
+    const missing: string[] = [];
+    if (step === 1) {
+      if (!form.name.trim()) missing.push('Full Name');
+      if (!form.age || parseInt(form.age) < 0 || parseInt(form.age) > 120) missing.push('a valid Age');
+      if (!/^[+\d][\d\s-]{7,14}$/.test(form.phone.trim())) missing.push('a valid Phone number');
+    }
+    if (step === 2) {
+      if (!form.hospital.trim()) missing.push('Hospital Name');
+      if (!form.hospitalCity.trim()) missing.push('City');
+      if (!form.hospitalState.trim()) missing.push('State');
+      if (!form.issueType) missing.push('Type of Issue');
+      if (!form.incidentDate) missing.push('Date of Incident');
+      else if (new Date(form.incidentDate) > new Date()) missing.push('a Date of Incident that is not in the future');
+      if (!form.issueDescription.trim() || form.issueDescription.trim().length < 20) missing.push('a fuller description of what happened (at least 20 characters)');
+    }
+    return missing;
+  };
+
+  const handleContinue = () => {
+    const missing = validateStep(formStep);
+    if (missing.length > 0) {
+      toast.error('Please complete this step', { description: `Missing: ${missing.join(', ')}` });
+      return;
+    }
+    setFormStep((s) => s + 1);
+  };
 
   const handleSubmitCase = () => {
     const estimatedDamageRupees = thousandsToRupees(form.estimatedDamage);
@@ -90,6 +128,7 @@ export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => 
     };
     addCase(newCase);
     setSubmitted(true);
+    toast.success('Grievance filed successfully', { description: `Case ${newCase.id} has been created and is under review.` });
   };
 
   const handleAI = async () => {
@@ -152,7 +191,7 @@ export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => 
             const Icon = t.icon;
             const active = activeTab === t.k;
             return (
-              <button key={t.k} onClick={() => setActiveTab(t.k as typeof activeTab)}
+              <button key={t.k} onClick={() => setActiveTab(t.k as typeof activeTab)} aria-current={active ? 'page' : undefined}
                 className={`flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-full transition-all whitespace-nowrap ${active ? 'bg-gold-500/20 text-gold-200 shadow-[0_0_12px_-2px_rgba(255,193,7,0.5)] border border-gold-400/30' : 'text-white/50 hover:text-white/80 hover:bg-white/5 border border-transparent'}`}>
                 <Icon className="w-3.5 h-3.5" /> {t.label}
               </button>
@@ -178,7 +217,7 @@ export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => 
                         <div className="font-display font-bold text-navy-800 text-lg mt-0.5">{activeCase.issueType}</div>
                         <div className="text-gray-500 text-sm">{activeCase.hospital}, {activeCase.hospitalCity}</div>
                       </div>
-                      <span className={`status-badge ${activeCase.status === 'negotiation' ? 'bg-amber-100 text-amber-700' : activeCase.status === 'resolved' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                      <span className={`status-badge ${activeCase.status === 'negotiation' ? 'bg-burgundy-100 text-burgundy-700' : activeCase.status === 'resolved' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
                         {activeCase.status.replace(/_/g, ' ')}
                       </span>
                     </div>
@@ -213,10 +252,13 @@ export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => 
                       <div className="bg-gradient-to-r from-burgundy-600 to-burgundy-800 rounded-xl p-4 text-white mb-4 border border-gold-400/20">
                         <div className="text-xs text-gold-300 mb-1">Active Settlement Track</div>
                         <div className="font-semibold flex items-center gap-1.5"><Handshake className="w-4 h-4" /> Negotiation In Progress</div>
-                        <div className="text-xs opacity-90 mt-1">
+                        <div className="text-xs opacity-90 mt-1 mb-3">
                           Hospital: ₹{activeCase.negotiation.hospitalOffer ? formatLakhs(activeCase.negotiation.hospitalOffer) : '—'}
                           {' · '}Our Counter: ₹{activeCase.negotiation.counterOffer ? formatLakhs(activeCase.negotiation.counterOffer) : activeCase.negotiation.ourDemand ? formatLakhs(activeCase.negotiation.ourDemand) : '—'}
                         </div>
+                        <button onClick={() => setShowNegotiation(true)} className="w-full bg-white/15 hover:bg-white/25 transition-colors rounded-lg py-2 text-xs font-semibold flex items-center justify-center gap-1.5">
+                          <Handshake className="w-3.5 h-3.5" /> View Full Negotiation &amp; Respond
+                        </button>
                       </div>
                     )}
 
@@ -502,7 +544,7 @@ export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => 
                       {formStep > 1 && (
                         <button onClick={() => setFormStep((s) => s - 1)} className="flex-1 btn-outline text-sm py-2.5">← Back</button>
                       )}
-                      <button onClick={() => formStep < 4 ? setFormStep((s) => s + 1) : handleSubmitCase()} className="flex-[2] btn-primary text-sm py-2.5">
+                      <button onClick={() => formStep < 4 ? handleContinue() : handleSubmitCase()} className="flex-[2] btn-primary text-sm py-2.5">
                         {formStep === 4 ? 'Submit Grievance ✓' : 'Continue →'}
                       </button>
                     </div>
@@ -531,8 +573,8 @@ export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => 
                       <div className="text-gray-400 text-xs">{doc.uploadedAt} · {doc.size}</div>
                     </div>
                     <div className="flex gap-1">
-                      <button className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 hover:text-navy-700 transition-colors"><Eye className="w-4 h-4" /></button>
-                      <button className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 hover:text-navy-700 transition-colors"><Download className="w-4 h-4" /></button>
+                      <button aria-label={`View ${doc.name}`} className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 hover:text-navy-700 transition-colors"><Eye className="w-4 h-4" /></button>
+                      <button aria-label={`Download ${doc.name}`} className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 hover:text-navy-700 transition-colors"><Download className="w-4 h-4" /></button>
                     </div>
                   </div>
                 ))}
@@ -612,6 +654,13 @@ export default function PatientDashboard({ onSignedOut }: { onSignedOut?: () => 
           )}
         </AnimatePresence>
       </div>
+
+      {/* Negotiation Modal — patients can view the full offer history and send a counter-offer */}
+      <AnimatePresence>
+        {showNegotiation && activeCase && (
+          <NegotiationPanel caseData={activeCase} onClose={() => setShowNegotiation(false)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
